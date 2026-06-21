@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nomen mit Artikeln — Deutsch A2</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body data-page="nouns">
+  <main class="container">
+    <p class="eyebrow">Wortschatz · Color-coded</p>
+    <h1 class="page-title">🔤 Nomen mit Artikeln</h1>
+    <p class="page-sub">
+      Always learn a noun <strong>with its article and plural</strong>. The colour is your memory hook:
+      <span class="g-der">der (blue)</span> · <span class="g-die">die (rose)</span> · <span class="g-das">das (green)</span>.
+      Click 🔊 to hear "der/die/das + noun".
+    </p>
+
+    <div class="controls">
+      <input class="search" id="search" type="search" placeholder="Suchen… (search German or English)" />
+      <button class="chip" data-g="all">Alle</button>
+      <button class="chip" data-g="der">nur <span class="g-der">der</span></button>
+      <button class="chip" data-g="die">nur <span class="g-die">die</span></button>
+      <button class="chip" data-g="das">nur <span class="g-das">das</span></button>
+    </div>
+    <div class="controls" id="cats"></div>
+    <p class="muted" id="count"></p>
+
+    <div id="list"></div>
+  </main>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/data/nouns.js"></script>
+  <script>
+    var list = document.getElementById("list");
+    var search = document.getElementById("search");
+    var countEl = document.getElementById("count");
+    var catsEl = document.getElementById("cats");
+    var genderFilter = "all";
+    var catFilter = "all";
+
+    var cats = ["all"].concat(NOUNS.map(function (n) { return n.cat; }).filter(function (v, i, a) { return a.indexOf(v) === i; }));
+    cats.forEach(function (c) {
+      var b = document.createElement("button");
+      b.className = "chip" + (c === "all" ? " active" : "");
+      b.textContent = c === "all" ? "Alle Themen" : c;
+      b.addEventListener("click", function () {
+        catFilter = c;
+        [].forEach.call(catsEl.children, function (x) { x.classList.remove("active"); });
+        b.classList.add("active");
+        render();
+      });
+      catsEl.appendChild(b);
+    });
+
+    document.querySelectorAll(".chip[data-g]").forEach(function (b) {
+      if (b.dataset.g === "all") b.classList.add("active");
+      b.addEventListener("click", function () {
+        genderFilter = b.dataset.g;
+        document.querySelectorAll(".chip[data-g]").forEach(function (x) { x.classList.remove("active"); });
+        b.classList.add("active");
+        render();
+      });
+    });
+
+    function render() {
+      var q = search.value.trim().toLowerCase();
+      var items = NOUNS.filter(function (n) {
+        if (genderFilter !== "all" && n.art !== genderFilter) return false;
+        if (catFilter !== "all" && n.cat !== catFilter) return false;
+        if (q && (n.de + " " + n.en).toLowerCase().indexOf(q) === -1) return false;
+        return true;
+      });
+      countEl.textContent = items.length + " Nomen";
+      var byCat = {};
+      items.forEach(function (n) { (byCat[n.cat] = byCat[n.cat] || []).push(n); });
+      list.innerHTML = "";
+      Object.keys(byCat).forEach(function (cat) {
+        var h = document.createElement("h2");
+        h.textContent = cat;
+        list.appendChild(h);
+        var wrap = document.createElement("div");
+        wrap.className = "vocab";
+        byCat[cat].forEach(function (n) {
+          var row = document.createElement("div");
+          row.className = "vrow " + n.art;
+          row.innerHTML =
+            '<span class="pill ' + n.art + '">' + n.art + '</span>' +
+            '<span><span class="word">' + n.de + '</span> ' +
+              '<span class="meta">Pl: ' + n.pl + '</span><br>' +
+              '<span class="en">' + n.en + '</span></span>';
+          row.appendChild(DE.sayButton(n.art + " " + n.de + ", die " + (n.pl !== "—" ? n.pl : n.de)));
+          wrap.appendChild(row);
+        });
+        list.appendChild(wrap);
+      });
+      if (!items.length) list.innerHTML = '<p class="muted">Nichts gefunden.</p>';
+    }
+    search.addEventListener("input", render);
+    render();
+  </script>
+</body>
+</html>

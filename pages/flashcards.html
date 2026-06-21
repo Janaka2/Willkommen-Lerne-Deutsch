@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Karteikarten — Deutsch A2</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body data-page="flashcards">
+  <main class="container narrow">
+    <p class="eyebrow">Spaced Repetition · Leitner-System</p>
+    <h1 class="page-title">🃏 Karteikarten</h1>
+    <p class="page-sub">
+      The smart way to remember. Cards you find hard come back soon; cards you know come back later.
+      Be honest with yourself — that's what makes it work. Aim for 20–40 cards a day.
+    </p>
+
+    <div class="controls">
+      <button class="chip active" data-deck="nouns">Nomen</button>
+      <button class="chip" data-deck="verbs">Verben</button>
+      <button class="chip" data-deck="sentences">Sätze</button>
+      <span style="flex:1"></span>
+      <button class="chip" data-dir="toggle" id="dirBtn">Richtung: EN → DE</button>
+    </div>
+
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="grid grid-4" style="gap:0.5rem;">
+        <div class="stat"><div class="n" id="st-due">0</div><div class="l">fällig (due)</div></div>
+        <div class="stat"><div class="n" id="st-new">0</div><div class="l">neu</div></div>
+        <div class="stat"><div class="n" id="st-learned">0</div><div class="l">gelernt (Box 5)</div></div>
+        <div class="stat"><div class="n" id="st-today">0</div><div class="l">heute geübt</div></div>
+      </div>
+    </div>
+
+    <div class="fc-stage">
+      <div class="flashcard" id="card">
+        <div class="fc-inner">
+          <div class="fc-face fc-front">
+            <div>
+              <div class="fc-word" id="front-word">—</div>
+              <div class="fc-sub" id="front-sub"></div>
+              <div class="fc-hint">Klick zum Umdrehen (click to flip)</div>
+            </div>
+          </div>
+          <div class="fc-face fc-back">
+            <div>
+              <div class="fc-word" id="back-word">—</div>
+              <div class="fc-sub" id="back-sub"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row center" id="answer-row" style="justify-content:center; display:none;">
+      <button class="btn lg" id="btn-again" style="border-color:var(--bad);color:var(--bad);">↻ Nochmal</button>
+      <button class="btn lg" id="btn-hard">Schwer</button>
+      <button class="btn good lg" id="btn-good">✓ Gewusst</button>
+    </div>
+    <div class="btn-row center" id="flip-row" style="justify-content:center;">
+      <button class="btn primary lg" id="btn-flip">Antwort zeigen 🔊</button>
+    </div>
+
+    <p class="center muted" id="empty-msg" style="display:none;">
+      🎉 Super! Für jetzt sind keine Karten fällig. Komm später wieder oder wechsle das Deck.
+    </p>
+
+    <div class="callout" style="margin-top:1.5rem;">
+      <div class="c-head">Wie das Leitner-System funktioniert</div>
+      Each card is in a box (1–5). <strong>Gewusst</strong> moves it one box up (longer interval).
+      <strong>Nochmal</strong> sends it back to box 1. Intervals: Box 1 = same day, 2 = 1 day, 3 = 3 days,
+      4 = 7 days, 5 = 16 days. Reach Box 5 = learned. All progress is saved on this device only.
+    </div>
+    <div class="btn-row center" style="justify-content:center;">
+      <button class="btn" id="reset">Fortschritt für dieses Deck zurücksetzen</button>
+    </div>
+  </main>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/data/nouns.js"></script>
+  <script src="../js/data/verbs.js"></script>
+  <script src="../js/data/sentences.js"></script>
+  <script>
+    var INTERVALS = [0, 0, 1, 3, 7, 16]; // days by box (index 1..5)
+    var deck = "nouns";
+    var dir = "en2de"; // or de2en
+    var current = null;
+
+    function todayStr() { return new Date().toISOString().slice(0, 10); }
+    function addDays(n) { return new Date(Date.now() + n * 86400000).toISOString().slice(0, 10); }
+
+    function buildDeck(name) {
+      if (name === "nouns") {
+        return NOUNS.map(function (n, i) {
+          return {
+            id: "n" + i,
+            de: n.art + " " + n.de,
+            deSub: "Plural: " + n.pl,
+            en: n.en,
+            speak: n.art + " " + n.de
+          };
+        });
+      }
+      if (name === "verbs") {
+        return VERBS.map(function (v, i) {
+          return { id: "v" + i, de: v.inf, deSub: "Perfekt: " + v.perf, en: v.en, speak: v.inf };
+        });
+      }
+      var arr = [];
+      SENTENCE_GROUPS.forEach(function (g, gi) {
+        g.items.forEach(function (it, ii) {
+          arr.push({ id: "s" + gi + "_" + ii, de: it.de, deSub: g.title, en: it.en, speak: it.de.replace(/_+/g, "etwas") });
+        });
+      });
+      return arr;
+    }
+
+    function progKey() { return "fc_" + deck; }
+    function getProg() { return DE.load(progKey(), {}); }
+    function setProg(p) { DE.store(progKey(), p); }
+
+    function cardState(prog, id) { return prog[id] || { box: 0, due: todayStr() }; }
+    function isDue(prog, id) {
+      var s = cardState(prog, id);
+      return s.box === 0 || s.due <= todayStr();
+    }
+
+    function updateStats() {
+      var cards = buildDeck(deck);
+      var prog = getProg();
+      var due = 0, neu = 0, learned = 0;
+      cards.forEach(function (c) {
+        var s = cardState(prog, c.id);
+        if (s.box === 0) neu++;
+        if (s.box === 5) learned++;
+        if (isDue(prog, c.id)) due++;
+      });
+      document.getElementById("st-due").textContent = due;
+      document.getElementById("st-new").textContent = neu;
+      document.getElementById("st-learned").textContent = learned;
+      document.getElementById("st-today").textContent = DE.load("cardsToday", 0);
+    }
+
+    function nextCard() {
+      var cards = buildDeck(deck);
+      var prog = getProg();
+      var dueCards = cards.filter(function (c) { return isDue(prog, c.id); });
+      // prefer review cards (box>0) first, then new
+      dueCards.sort(function (a, b) {
+        return cardState(prog, a.id).box - cardState(prog, b.id).box;
+      });
+      var cardEl = document.getElementById("card");
+      var flipRow = document.getElementById("flip-row");
+      var ansRow = document.getElementById("answer-row");
+      var empty = document.getElementById("empty-msg");
+      cardEl.classList.remove("flipped");
+
+      if (!dueCards.length) {
+        current = null;
+        document.querySelector(".fc-stage").style.display = "none";
+        flipRow.style.display = "none";
+        ansRow.style.display = "none";
+        empty.style.display = "block";
+        return;
+      }
+      document.querySelector(".fc-stage").style.display = "grid";
+      empty.style.display = "none";
+      flipRow.style.display = "flex";
+      ansRow.style.display = "none";
+
+      current = dueCards[Math.floor(Math.random() * Math.min(dueCards.length, 12))];
+      var frontIsEN = dir === "en2de";
+      document.getElementById("front-word").textContent = frontIsEN ? current.en : current.de;
+      document.getElementById("front-sub").textContent = frontIsEN ? "" : current.deSub;
+      document.getElementById("back-word").textContent = frontIsEN ? current.de : current.en;
+      document.getElementById("back-sub").textContent = frontIsEN ? current.deSub : "";
+    }
+
+    function flip() {
+      if (!current) return;
+      document.getElementById("card").classList.add("flipped");
+      document.getElementById("flip-row").style.display = "none";
+      document.getElementById("answer-row").style.display = "flex";
+      DE.speak(current.speak);
+    }
+
+    function answer(result) {
+      if (!current) return;
+      var prog = getProg();
+      var s = cardState(prog, current.id);
+      if (result === "good") s.box = Math.min(5, (s.box || 0) + 1);
+      else if (result === "hard") s.box = Math.max(1, s.box || 1);
+      else s.box = 1; // again
+      s.due = addDays(INTERVALS[s.box] || 0);
+      if (result === "again") s.due = todayStr();
+      prog[current.id] = s;
+      setProg(prog);
+      DE.store("cardsToday", DE.load("cardsToday", 0) + 1);
+      updateStats();
+      nextCard();
+    }
+
+    // wire up
+    document.getElementById("card").addEventListener("click", function () {
+      if (!document.getElementById("card").classList.contains("flipped")) flip();
+    });
+    document.getElementById("btn-flip").addEventListener("click", flip);
+    document.getElementById("btn-good").addEventListener("click", function () { answer("good"); });
+    document.getElementById("btn-hard").addEventListener("click", function () { answer("hard"); });
+    document.getElementById("btn-again").addEventListener("click", function () { answer("again"); });
+
+    document.querySelectorAll(".chip[data-deck]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        deck = b.dataset.deck;
+        document.querySelectorAll(".chip[data-deck]").forEach(function (x) { x.classList.remove("active"); });
+        b.classList.add("active");
+        updateStats(); nextCard();
+      });
+    });
+    document.getElementById("dirBtn").addEventListener("click", function () {
+      dir = dir === "en2de" ? "de2en" : "en2de";
+      this.textContent = "Richtung: " + (dir === "en2de" ? "EN → DE" : "DE → EN");
+      nextCard();
+    });
+    document.getElementById("reset").addEventListener("click", function () {
+      if (confirm("Fortschritt für dieses Deck wirklich löschen?")) { setProg({}); updateStats(); nextCard(); }
+    });
+
+    // keyboard shortcuts
+    document.addEventListener("keydown", function (e) {
+      if (e.key === " " ) { e.preventDefault(); if (!document.getElementById("card").classList.contains("flipped")) flip(); }
+      else if (document.getElementById("card").classList.contains("flipped")) {
+        if (e.key === "1") answer("again");
+        else if (e.key === "2") answer("hard");
+        else if (e.key === "3") answer("good");
+      }
+    });
+
+    updateStats();
+    nextCard();
+  </script>
+</body>
+</html>

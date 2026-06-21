@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wichtige Verben — Deutsch A2</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body data-page="verbs">
+  <main class="container">
+    <p class="eyebrow">Wortschatz · Präsens + Perfekt</p>
+    <h1 class="page-title">⚡ Die wichtigsten Verben</h1>
+    <p class="page-sub">
+      Master these and you can say almost anything at A2. Each verb shows the
+      <strong>er/sie/es</strong> form (present) and the <strong>Perfekt</strong> (past for speaking).
+      Tags warn you about irregular, separable, reflexive verbs and the ones that take Dative.
+    </p>
+
+    <div class="callout"><div class="c-head">Tag-Legende</div>
+      <span class="pill tag">irregular</span> stem/vowel changes &nbsp;
+      <span class="pill tag">separable</span> prefix splits off &nbsp;
+      <span class="pill tag">reflexive</span> needs sich/mich &nbsp;
+      <span class="pill tag">modal</span> &nbsp;
+      <span class="pill tag">sein</span> Perfekt with sein &nbsp;
+      <span class="pill tag">+Dat</span> takes a dative object
+    </div>
+
+    <div class="controls">
+      <input class="search" id="search" type="search" placeholder="Suchen… (German or English)" />
+      <button class="chip active" data-f="all">Alle</button>
+      <button class="chip" data-f="irregular">unregelmäßig</button>
+      <button class="chip" data-f="separable">trennbar</button>
+      <button class="chip" data-f="reflexive">reflexiv</button>
+      <button class="chip" data-f="modal">Modal</button>
+      <button class="chip" data-f="sein">Perfekt mit sein</button>
+      <button class="chip" data-f="+Dat">+Dativ</button>
+    </div>
+    <p class="muted" id="count"></p>
+
+    <div class="table-wrap">
+      <table class="grammar" id="vtable">
+        <thead><tr><th></th><th>Infinitiv</th><th>er/sie/es</th><th>Perfekt</th><th>English</th><th>Tags</th></tr></thead>
+        <tbody id="vbody"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/data/verbs.js"></script>
+  <script>
+    var body = document.getElementById("vbody");
+    var search = document.getElementById("search");
+    var countEl = document.getElementById("count");
+    var filter = "all";
+
+    document.querySelectorAll(".chip[data-f]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        filter = b.dataset.f;
+        document.querySelectorAll(".chip[data-f]").forEach(function (x) { x.classList.remove("active"); });
+        b.classList.add("active");
+        render();
+      });
+    });
+
+    function tagHtml(tags) {
+      return tags.map(function (t) { return '<span class="pill tag">' + t + '</span>'; }).join(" ");
+    }
+
+    function render() {
+      var q = search.value.trim().toLowerCase();
+      var items = VERBS.filter(function (v) {
+        if (filter !== "all" && v.tags.indexOf(filter) === -1) return false;
+        if (q && (v.inf + " " + v.en).toLowerCase().indexOf(q) === -1) return false;
+        return true;
+      });
+      countEl.textContent = items.length + " Verben";
+      body.innerHTML = "";
+      items.forEach(function (v) {
+        var tr = document.createElement("tr");
+        tr.innerHTML =
+          '<td></td>' +
+          '<td><strong>' + v.inf + '</strong></td>' +
+          '<td>' + v.er + '</td>' +
+          '<td>' + v.perf + '</td>' +
+          '<td class="muted">' + v.en + '</td>' +
+          '<td>' + tagHtml(v.tags) + '</td>';
+        tr.children[0].appendChild(DE.sayButton(v.inf));
+        body.appendChild(tr);
+      });
+      if (!items.length) body.innerHTML = '<tr><td colspan="6" class="muted">Nichts gefunden.</td></tr>';
+    }
+    search.addEventListener("input", render);
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Satzmuster zum Sprechen — Deutsch A2</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body data-page="sentences">
+  <main class="container narrow">
+    <p class="eyebrow">Sprechen · Satzbausteine</p>
+    <h1 class="page-title">💬 Satzmuster — flüssig sprechen</h1>
+    <p class="page-sub">
+      These are <strong>ready-made sentence frames</strong>. Learn the frame by heart, then drop in your
+      own words at <strong>___</strong>. Speak each one out loud, many times. This is the fastest way to
+      sound fluent. Click 🔊 to hear it.
+    </p>
+
+    <div class="callout warn"><div class="c-head">🧠 Methode (the method)</div>
+      Pick 10 patterns. Say each one 10 times aloud. Then build 3 of your own sentences with it.
+      Tomorrow, review them and add 10 new ones. <strong>Repetition turns patterns into reflexes.</strong></div>
+
+    <div class="controls">
+      <input class="search" id="search" type="search" placeholder="Suchen… (German or English)" />
+    </div>
+
+    <div id="groups"></div>
+  </main>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/data/sentences.js"></script>
+  <script>
+    var groupsEl = document.getElementById("groups");
+    var search = document.getElementById("search");
+
+    function render() {
+      var q = search.value.trim().toLowerCase();
+      groupsEl.innerHTML = "";
+      SENTENCE_GROUPS.forEach(function (g) {
+        var items = g.items.filter(function (it) {
+          if (!q) return true;
+          return (it.de + " " + it.en + " " + g.title).toLowerCase().indexOf(q) !== -1;
+        });
+        if (!items.length) return;
+        var card = document.createElement("section");
+        card.className = "card";
+        card.style.marginBottom = "1.3rem";
+        var h = '<h2 style="margin-top:0;">' + g.title + '</h2>' +
+                '<p class="muted" style="margin-top:-0.4rem;">' + g.en + '</p>';
+        var rows = items.map(function (it) {
+          var note = it.note ? ' <span class="pill tag">' + it.note + '</span>' : "";
+          return '<div class="ex" data-de="' + it.de.replace(/"/g, "&quot;") + '">' +
+                   '<span class="de">' + it.de + '</span>' + note +
+                   ' <span class="say-slot"></span><br>' +
+                   '<span class="en">' + it.en + '</span>' +
+                 '</div>';
+        }).join("");
+        card.innerHTML = h + '<div class="ex list" style="margin-top:0.6rem;">' + rows + '</div>';
+        groupsEl.appendChild(card);
+      });
+      // wire audio buttons (speak text without the ___ placeholder)
+      groupsEl.querySelectorAll(".ex[data-de]").forEach(function (ex) {
+        var slot = ex.querySelector(".say-slot");
+        if (slot) slot.appendChild(DE.sayButton(ex.getAttribute("data-de").replace(/_+/g, "etwas")));
+      });
+      if (!groupsEl.children.length) groupsEl.innerHTML = '<p class="muted">Nichts gefunden.</p>';
+    }
+    search.addEventListener("input", render);
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz — Deutsch A2</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body data-page="quiz">
+  <main class="container narrow">
+    <p class="eyebrow">Testen · Sofortiges Feedback</p>
+    <h1 class="page-title">✅ Quiz: Artikel & Fälle</h1>
+    <p class="page-sub">
+      Drill the correct article. Each question explains <em>why</em>. Don't just guess —
+      say the full phrase out loud after each answer.
+    </p>
+
+    <div class="controls">
+      <button class="chip active" data-mode="genus">Artikel (der/die/das)</button>
+      <button class="chip" data-mode="cases">Fälle (Akk/Dat)</button>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
+        <span class="muted" id="score">Richtig: 0 / 0</span>
+        <span class="muted" id="streak">Serie: 0 🔥</span>
+      </div>
+      <div class="quiz-q" id="question">—</div>
+      <div class="quiz-options" id="options"></div>
+      <div class="quiz-feedback" id="feedback"></div>
+      <div class="btn-row" id="next-row" style="display:none;">
+        <button class="btn primary lg" id="next">Nächste Frage →</button>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:1.5rem;">
+      <div class="c-head">Tipp</div>
+      Stuck on genders? Open the <a href="nouns.html">Nomen</a> list (colour-coded) and the
+      <a href="cases.html">Fälle</a> tables in another moment. Then come back and test again.
+    </div>
+  </main>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/data/nouns.js"></script>
+  <script>
+    var mode = "genus";
+    var correct = 0, total = 0, streak = 0;
+    var answered = false;
+
+    // article tables (definite)
+    var ART = {
+      der: { nom: "der", akk: "den", dat: "dem" }, // masculine
+      die: { nom: "die", akk: "die", dat: "der" }, // feminine
+      das: { nom: "das", akk: "das", dat: "dem" }  // neuter
+    };
+    var CASE_OPTIONS = {
+      nom: ["der", "die", "das"],
+      akk: ["den", "die", "das"],
+      dat: ["dem", "der", "den"]
+    };
+    // case "cases" mode triggers (Akk / Dat) with templates
+    var TEMPLATES = [
+      { c: "akk", q: "Ich sehe ___ {N}.", why: "„sehen“ braucht ein direktes Objekt → Akkusativ." },
+      { c: "akk", q: "Ich kaufe ___ {N}.", why: "„kaufen“ → direktes Objekt → Akkusativ." },
+      { c: "akk", q: "Ich habe ___ {N}.", why: "„haben“ → Akkusativ." },
+      { c: "akk", q: "Er sucht ___ {N}. (für)", why: "„für“ ist eine Akkusativ-Präposition." , prep: "für"},
+      { c: "dat", q: "Ich fahre mit ___ {N}.", why: "„mit“ ist eine Dativ-Präposition." },
+      { c: "dat", q: "Das Geschenk ist von ___ {N}.", why: "„von“ ist eine Dativ-Präposition." },
+      { c: "dat", q: "Ich helfe ___ {N}.", why: "„helfen“ ist ein Dativ-Verb." },
+      { c: "dat", q: "Ich komme aus ___ {N}.", why: "„aus“ ist eine Dativ-Präposition." }
+    ];
+
+    var qEl = document.getElementById("question");
+    var optsEl = document.getElementById("options");
+    var fbEl = document.getElementById("feedback");
+    var nextRow = document.getElementById("next-row");
+
+    function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+    function shuffle(a) { return a.slice().sort(function () { return Math.random() - 0.5; }); }
+
+    function newQuestion() {
+      answered = false;
+      fbEl.textContent = "";
+      fbEl.style.color = "";
+      nextRow.style.display = "none";
+      optsEl.innerHTML = "";
+
+      var noun = rand(NOUNS);
+      // skip plural-only / weird entries gracefully
+      var gender = noun.art; // der/die/das
+      var correctArt, options, prompt, why, speak;
+
+      if (mode === "genus") {
+        correctArt = gender;
+        options = shuffle(["der", "die", "das"]);
+        prompt = "___ " + noun.de + "  <span class='muted'>(" + noun.en + ")</span>";
+        why = correctArt + " " + noun.de + " — " + noun.en + ".";
+        speak = gender + " " + noun.de;
+      } else {
+        var tpl = rand(TEMPLATES);
+        correctArt = ART[gender][tpl.c];
+        options = shuffle(CASE_OPTIONS[tpl.c].slice());
+        var sentence = tpl.q.replace("{N}", noun.de);
+        prompt = sentence.replace("___", "<span class='hl'>___</span>") + "  <span class='muted'>(" + noun.en + ")</span>";
+        why = tpl.why + " → <strong>" + correctArt + " " + noun.de + "</strong>.";
+        speak = sentence.replace("___", correctArt);
+      }
+
+      qEl.innerHTML = prompt;
+      options.forEach(function (opt) {
+        var b = document.createElement("button");
+        b.className = "quiz-opt";
+        b.textContent = opt;
+        b.addEventListener("click", function () { choose(b, opt, correctArt, why, speak); });
+        optsEl.appendChild(b);
+      });
+    }
+
+    function choose(btn, opt, correctArt, why, speak) {
+      if (answered) return;
+      answered = true;
+      total++;
+      var buttons = optsEl.querySelectorAll(".quiz-opt");
+      buttons.forEach(function (b) {
+        if (b.textContent === correctArt) b.classList.add("correct");
+        if (b === btn && opt !== correctArt) b.classList.add("wrong");
+      });
+      if (opt === correctArt) {
+        correct++; streak++;
+        fbEl.innerHTML = "✓ Richtig! " + why;
+        fbEl.style.color = "var(--good)";
+      } else {
+        streak = 0;
+        fbEl.innerHTML = "✗ Leider falsch. " + why;
+        fbEl.style.color = "var(--bad)";
+      }
+      DE.speak(speak);
+      document.getElementById("score").textContent = "Richtig: " + correct + " / " + total;
+      document.getElementById("streak").textContent = "Serie: " + streak + " 🔥";
+      nextRow.style.display = "flex";
+    }
+
+    document.getElementById("next").addEventListener("click", newQuestion);
+    document.querySelectorAll(".chip[data-mode]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        mode = b.dataset.mode;
+        document.querySelectorAll(".chip[data-mode]").forEach(function (x) { x.classList.remove("active"); });
+        b.classList.add("active");
+        correct = 0; total = 0; streak = 0;
+        document.getElementById("score").textContent = "Richtig: 0 / 0";
+        document.getElementById("streak").textContent = "Serie: 0 🔥";
+        newQuestion();
+      });
+    });
+
+    newQuestion();
+  </script>
+</body>
+</html>

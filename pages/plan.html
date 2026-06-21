@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tagesplan — Deutsch A2</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body data-page="plan">
+  <main class="container narrow">
+    <p class="eyebrow">Routine · 4 Stunden pro Tag</p>
+    <h1 class="page-title">Dein Tagesplan 📅</h1>
+    <p class="page-sub">
+      A simple daily routine for intensive learning. Tick each box as you finish.
+      Your progress is saved automatically and resets each new day.
+    </p>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
+        <strong id="plan-date"></strong>
+        <span id="plan-count" class="muted"></span>
+      </div>
+      <div class="progress-bar" style="margin-top:0.6rem;"><span id="plan-progress"></span></div>
+    </div>
+
+    <ul class="checklist" id="checklist"></ul>
+
+    <div class="callout good" style="margin-top:1.5rem;">
+      <div class="c-head">🔥 So bleibst du dran (How to keep the habit)</div>
+      <p style="margin:0;">Same time, same place, every day. Even 20 minutes counts. Speak out loud —
+      your mouth needs practice too, not only your eyes. Missed a day? Just start again today.</p>
+    </div>
+
+    <h2>Warum dieser Plan? (Why this plan works)</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3 style="margin-top:0;">Aktiv statt passiv</h3>
+        <p class="muted">Reading is not enough. You must <strong>speak</strong>, <strong>write</strong> and
+        <strong>test yourself</strong>. The plan mixes input (grammar, listening) with output (speaking, flashcards).</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0;">Wiederholung (spaced repetition)</h3>
+        <p class="muted">You review a little every day. Words you find hard come back more often in the flashcards.
+        That is how short-term memory becomes long-term memory.</p>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/app.js"></script>
+  <script>
+    var TASKS = [
+      { t: "20 min", k: "warmup", de: "Aufwärmen: 20 Karteikarten wiederholen", en: "Warm up: review 20 flashcards" },
+      { t: "30 min", k: "grammar", de: "Eine Grammatik-Lektion lesen & verstehen", en: "Read & understand one grammar lesson" },
+      { t: "30 min", k: "speak", de: "10 Satzmuster laut sprechen (10×)", en: "Speak 10 sentence patterns out loud (10× each)" },
+      { t: "30 min", k: "nouns", de: "15 neue Nomen mit Artikel + Plural lernen", en: "Learn 15 new nouns with article + plural" },
+      { t: "30 min", k: "verbs", de: "10 Verben üben (Präsens + Perfekt)", en: "Practise 10 verbs (present + Perfekt)" },
+      { t: "20 min", k: "listen", de: "Easy German Video schauen & nachsprechen", en: "Watch an Easy German video & repeat" },
+      { t: "20 min", k: "quiz", de: "Quiz machen (Artikel & Fälle)", en: "Do a quiz (articles & cases)" },
+      { t: "20 min", k: "write", de: "5 eigene Sätze schreiben & laut lesen", en: "Write 5 of your own sentences & read aloud" }
+    ];
+
+    var today = new Date().toISOString().slice(0, 10);
+    var storeKey = "plan_" + today;
+    var state = DE.load(storeKey, {});
+    DE.store("planTotal", TASKS.length);
+
+    var dateEl = document.getElementById("plan-date");
+    dateEl.textContent = new Date().toLocaleDateString("de-DE", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+
+    var list = document.getElementById("checklist");
+    function render() {
+      list.innerHTML = "";
+      TASKS.forEach(function (task) {
+        var li = document.createElement("li");
+        var done = !!state[task.k];
+        if (done) li.className = "done";
+        li.innerHTML =
+          '<input type="checkbox" ' + (done ? "checked" : "") + ' id="cb-' + task.k + '">' +
+          '<label for="cb-' + task.k + '">' +
+            '<span class="time">' + task.t + '</span> &nbsp;' +
+            '<strong>' + task.de + '</strong><br>' +
+            '<span class="muted">' + task.en + '</span>' +
+          '</label>';
+        var cb = li.querySelector("input");
+        cb.addEventListener("change", function () {
+          state[task.k] = cb.checked;
+          DE.store(storeKey, state);
+          render();
+        });
+        list.appendChild(li);
+      });
+      var done = TASKS.filter(function (x) { return state[x.k]; }).length;
+      var pct = Math.round((done / TASKS.length) * 100);
+      document.getElementById("plan-progress").style.width = pct + "%";
+      document.getElementById("plan-count").textContent = done + " / " + TASKS.length + " erledigt (" + pct + "%)";
+    }
+    render();
+  </script>
+</body>
+</html>
