@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deutsch A2 — Deine komplette Lernseite</title>
+  <meta name="description" content="Offline German A1–A2 course: grammar, nouns with articles, verbs, speaking patterns, flashcards and quizzes." />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-page="index">
+
+  <main class="container">
+    <p class="eyebrow">A1 → A2 · Sprechen lernen · Offline & privat</p>
+    <h1 class="page-title">Willkommen! Lerne Deutsch — Schritt für Schritt. 🇩🇪</h1>
+    <p class="page-sub">
+      Everything you need to reach <strong>A2</strong> in one place: clear grammar, all the
+      nouns with their articles, the must-know verbs, ready-to-use speaking sentences, and
+      practice that helps you <strong>remember</strong>. Click any 🔊 to hear the German.
+    </p>
+
+    <div class="card" style="margin-bottom:2rem;">
+      <h2 style="margin-top:0;">So benutzt du diese Seite (How to use this site)</h2>
+      <div class="grid grid-3">
+        <div>
+          <h3>1. Verstehen</h3>
+          <p class="muted">Read the <strong>Golden Rules</strong> and <strong>Grammar</strong>. Short, clear, with English. Don't memorise tables — understand the logic.</p>
+        </div>
+        <div>
+          <h3>2. Sprechen</h3>
+          <p class="muted">Learn the <strong>Sentence Patterns</strong> by heart. Speak them out loud every day. Language is memory + repetition.</p>
+        </div>
+        <div>
+          <h3>3. Wiederholen</h3>
+          <p class="muted">Use <strong>Flashcards</strong> and <strong>Quizzes</strong> daily. A little every day beats a lot once a week.</p>
+        </div>
+      </div>
+      <div class="btn-row" style="margin-bottom:0;">
+        <a class="btn primary lg" href="pages/plan.html">▶ Heute starten — Tagesplan</a>
+        <a class="btn lg" href="pages/golden-rules.html">Goldene Regeln ansehen</a>
+      </div>
+    </div>
+
+    <h2>Alle Bereiche (All sections)</h2>
+    <div class="grid grid-3">
+      <a class="tile" href="pages/golden-rules.html">
+        <span class="ico">⭐</span>
+        <div class="t-title">Goldene Regeln</div>
+        <div class="t-desc">The core rules to remember. If you know these, German makes sense.</div>
+      </a>
+      <a class="tile" href="pages/grammar.html">
+        <span class="ico">📘</span>
+        <div class="t-title">Grammatik A1 + A2</div>
+        <div class="t-desc">Every grammar topic, gradually, with clear examples and English meaning.</div>
+      </a>
+      <a class="tile" href="pages/cases.html">
+        <span class="ico">🧩</span>
+        <div class="t-title">Die 4 Fälle</div>
+        <div class="t-desc">Nominativ, Akkusativ, Dativ, Genitiv — the article tables made simple.</div>
+      </a>
+      <a class="tile" href="pages/nouns.html">
+        <span class="ico">🔤</span>
+        <div class="t-title">Nomen mit Artikeln</div>
+        <div class="t-desc">~280 nouns by theme. Color-coded: <span class="g-der">der</span> · <span class="g-die">die</span> · <span class="g-das">das</span>.</div>
+      </a>
+      <a class="tile" href="pages/verbs.html">
+        <span class="ico">⚡</span>
+        <div class="t-title">Wichtige Verben</div>
+        <div class="t-desc">~150 must-know verbs with present tense, Perfekt and English.</div>
+      </a>
+      <a class="tile" href="pages/sentences.html">
+        <span class="ico">💬</span>
+        <div class="t-title">Satzmuster (Speaking)</div>
+        <div class="t-desc">Ready-made sentence frames for real conversations. Speak fluently.</div>
+      </a>
+      <a class="tile" href="pages/flashcards.html">
+        <span class="ico">🃏</span>
+        <div class="t-title">Karteikarten</div>
+        <div class="t-desc">Spaced-repetition flashcards. The hard cards come back more often.</div>
+      </a>
+      <a class="tile" href="pages/quiz.html">
+        <span class="ico">✅</span>
+        <div class="t-title">Quiz</div>
+        <div class="t-desc">Test your articles and cases with instant feedback.</div>
+      </a>
+      <a class="tile" href="pages/plan.html">
+        <span class="ico">📅</span>
+        <div class="t-title">Tagesplan</div>
+        <div class="t-desc">A 4-hour daily routine. Tick the boxes and build a streak.</div>
+      </a>
+    </div>
+
+    <h2>Dein Fortschritt heute (Your progress today)</h2>
+    <div class="card">
+      <div class="grid grid-3" id="dash-stats">
+        <div class="stat"><div class="n" id="st-streak">0</div><div class="l">Tage am Stück (streak)</div></div>
+        <div class="stat"><div class="n" id="st-cards">0</div><div class="l">Karten heute geübt</div></div>
+        <div class="stat"><div class="n" id="st-plan">0%</div><div class="l">Tagesplan erledigt</div></div>
+      </div>
+    </div>
+
+    <div class="callout warn" style="margin-top:2rem;">
+      <div class="c-head">💡 Merksatz für jeden Tag</div>
+      <span data-say-self>Ich lerne jeden Tag ein bisschen Deutsch.</span>
+      <span class="en"> — I learn a little German every day.</span>
+    </div>
+  </main>
+
+  <script src="js/app.js"></script>
+  <script>
+    (function () {
+      var streak = DE.load("streak", 0);
+      var lastDay = DE.load("lastActiveDay", "");
+      var today = new Date().toISOString().slice(0, 10);
+      // mark active today
+      if (lastDay !== today) {
+        var yest = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+        streak = (lastDay === yest) ? streak + 1 : 1;
+        DE.store("streak", streak);
+        DE.store("lastActiveDay", today);
+        DE.store("cardsToday", 0);
+      }
+      document.getElementById("st-streak").textContent = streak;
+      document.getElementById("st-cards").textContent = DE.load("cardsToday", 0);
+      var plan = DE.load("plan_" + today, {});
+      var totalTasks = DE.load("planTotal", 8);
+      var done = Object.keys(plan).filter(function (k) { return plan[k]; }).length;
+      var pct = totalTasks ? Math.round((done / totalTasks) * 100) : 0;
+      document.getElementById("st-plan").textContent = pct + "%";
+    })();
+  </script>
+</body>
+</html>
