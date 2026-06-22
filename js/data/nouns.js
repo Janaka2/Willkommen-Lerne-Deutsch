@@ -289,5 +289,13 @@ window.NOUNS = [
   { de: "Information", art: "die", pl: "Informationen", en: "information", cat: "Abstract & Useful" },
   { de: "Erfahrung", art: "die", pl: "Erfahrungen", en: "experience", cat: "Abstract & Useful" },
   { de: "Entscheidung", art: "die", pl: "Entscheidungen", en: "decision", cat: "Abstract & Useful" },
-  { de: "Gespräch", art: "das", pl: "Gespräche", en: "conversation", cat: "Abstract & Useful" }
+  { de: "Gespräch", art: "das", pl: "Gespräche", en: "conversation", cat: "Abstract & Useful" },
+
+  /* ===== Extra A1 essentials ===== */
+  { de: "Adresse", art: "die", pl: "Adressen", en: "address", cat: "People & Family" },
+  { de: "Nummer", art: "die", pl: "Nummern", en: "number", cat: "School & Study" },
+  { de: "Land", art: "das", pl: "Länder", en: "country", cat: "City & Places" },
+  { de: "Getränk", art: "das", pl: "Getränke", en: "drink / beverage", cat: "Food & Drink" },
+  { de: "Ferien", art: "die", pl: "Ferien", en: "holidays / vacation (plural)", cat: "Time & Calendar" },
+  { de: "Lieblingsessen", art: "das", pl: "Lieblingsessen", en: "favourite food", cat: "Food & Drink" }
 ];

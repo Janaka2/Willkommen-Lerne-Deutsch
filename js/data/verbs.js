@@ -176,5 +176,13 @@ window.VERBS = [
   { inf: "legen", en: "to lay / put (flat)", er: "legt", perf: "hat gelegt", tags: [] },
   { inf: "stellen", en: "to put / place (upright)", er: "stellt", perf: "hat gestellt", tags: [] },
   { inf: "setzen", en: "to set / put", er: "setzt", perf: "hat gesetzt", tags: [] },
-  { inf: "geben", en: "to give", er: "gibt", perf: "hat gegeben", tags: ["irregular"] }
+  { inf: "geben", en: "to give", er: "gibt", perf: "hat gegeben", tags: ["irregular"] },
+
+  /* ===== Extra A1/A2 essentials ===== */
+  { inf: "heißen", en: "to be called", er: "heißt", perf: "hat geheißen", tags: ["irregular"] },
+  { inf: "frühstücken", en: "to have breakfast", er: "frühstückt", perf: "hat gefrühstückt", tags: [] },
+  { inf: "buchstabieren", en: "to spell", er: "buchstabiert", perf: "hat buchstabiert", tags: [] },
+  { inf: "kennenlernen", en: "to get to know / meet", er: "lernt kennen", perf: "hat kennengelernt", tags: ["separable"] },
+  { inf: "einladen", en: "to invite", er: "lädt ein", perf: "hat eingeladen", tags: ["separable", "irregular"] },
+  { inf: "gratulieren", en: "to congratulate", er: "gratuliert", perf: "hat gratuliert", tags: ["+Dat"] }
 ];
