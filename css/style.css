@@ -285,6 +285,10 @@ table.grammar caption { caption-side: top; text-align: left; font-weight: 700; c
 .pill.das { color: var(--das); background: var(--das-bg); }
 .pill.pl  { color: var(--plural); background: var(--plural-bg); }
 .pill.tag { color: var(--text-soft); background: var(--bg-soft); border-color: var(--border); }
+.pill.lvl-a1 { color: #0f7a6b; background: #d9f3ee; }
+.pill.lvl-a2 { color: #9a5b00; background: #fbecd4; }
+[data-theme="dark"] .pill.lvl-a1 { color: #79e2cf; background: #103029; }
+[data-theme="dark"] .pill.lvl-a2 { color: #f0bd6a; background: #33260f; }
 
 /* ---------- Audio buttons ---------- */
 .say {
