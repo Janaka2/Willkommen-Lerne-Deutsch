@@ -13,6 +13,7 @@
   var NAV = [
     { key: "index",        label: "Start",            href: "index.html" },
     { key: "plan",         label: "Tagesplan",        href: "pages/plan.html" },
+    { key: "basics",       label: "A1 Grundlagen",    href: "pages/basics.html" },
     { key: "golden-rules", label: "Goldene Regeln",   href: "pages/golden-rules.html" },
     { key: "grammar",      label: "Grammatik",        href: "pages/grammar.html" },
     { key: "cases",        label: "Fälle (Cases)",    href: "pages/cases.html" },
