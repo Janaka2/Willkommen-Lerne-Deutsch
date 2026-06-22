@@ -35,28 +35,45 @@
       <button class="chip" data-f="sein">Perfekt mit sein</button>
       <button class="chip" data-f="+Dat">+Dativ</button>
     </div>
+    <div class="controls">
+      <span class="muted" style="font-weight:700;">Niveau:</span>
+      <button class="chip active" data-l="all">A1 + A2</button>
+      <button class="chip" data-l="A1"><span class="pill lvl-a1">A1</span> nur A1</button>
+      <button class="chip" data-l="A2"><span class="pill lvl-a2">A2</span> nur A2</button>
+    </div>
     <p class="muted" id="count"></p>
 
     <div class="table-wrap">
       <table class="grammar" id="vtable">
-        <thead><tr><th></th><th>Infinitiv</th><th>er/sie/es</th><th>Perfekt</th><th>English</th><th>Tags</th></tr></thead>
+        <thead><tr><th></th><th>Infinitiv</th><th>Niveau</th><th>er/sie/es</th><th>Perfekt</th><th>English</th><th>Tags</th></tr></thead>
         <tbody id="vbody"></tbody>
       </table>
     </div>
   </main>
 
   <script src="../js/app.js"></script>
+  <script src="../js/data/levels.js"></script>
   <script src="../js/data/verbs.js"></script>
   <script>
     var body = document.getElementById("vbody");
     var search = document.getElementById("search");
     var countEl = document.getElementById("count");
     var filter = "all";
+    var levelFilter = "all";
 
     document.querySelectorAll(".chip[data-f]").forEach(function (b) {
       b.addEventListener("click", function () {
         filter = b.dataset.f;
         document.querySelectorAll(".chip[data-f]").forEach(function (x) { x.classList.remove("active"); });
+        b.classList.add("active");
+        render();
+      });
+    });
+
+    document.querySelectorAll(".chip[data-l]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        levelFilter = b.dataset.l;
+        document.querySelectorAll(".chip[data-l]").forEach(function (x) { x.classList.remove("active"); });
         b.classList.add("active");
         render();
       });
@@ -70,16 +87,19 @@
       var q = search.value.trim().toLowerCase();
       var items = VERBS.filter(function (v) {
         if (filter !== "all" && v.tags.indexOf(filter) === -1) return false;
+        if (levelFilter !== "all" && verbLevel(v.inf) !== levelFilter) return false;
         if (q && (v.inf + " " + v.en).toLowerCase().indexOf(q) === -1) return false;
         return true;
       });
       countEl.textContent = items.length + " Verben";
       body.innerHTML = "";
       items.forEach(function (v) {
+        var lvl = verbLevel(v.inf);
         var tr = document.createElement("tr");
         tr.innerHTML =
           '<td></td>' +
           '<td><strong>' + v.inf + '</strong></td>' +
+          '<td><span class="pill lvl-' + lvl.toLowerCase() + '">' + lvl + '</span></td>' +
           '<td>' + v.er + '</td>' +
           '<td>' + v.perf + '</td>' +
           '<td class="muted">' + v.en + '</td>' +
@@ -87,7 +107,7 @@
         tr.children[0].appendChild(DE.sayButton(v.inf));
         body.appendChild(tr);
       });
-      if (!items.length) body.innerHTML = '<tr><td colspan="6" class="muted">Nichts gefunden.</td></tr>';
+      if (!items.length) body.innerHTML = '<tr><td colspan="7" class="muted">Nichts gefunden.</td></tr>';
     }
     search.addEventListener("input", render);
     render();
