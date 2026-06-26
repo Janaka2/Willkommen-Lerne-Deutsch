@@ -37,17 +37,33 @@
         </div>
       </div>
       <div class="btn-row" style="margin-bottom:0;">
-        <a class="btn primary lg" href="pages/plan.html">▶ Heute starten — Tagesplan</a>
-        <a class="btn lg" href="pages/golden-rules.html">Goldene Regeln ansehen</a>
+        <a class="btn primary lg" href="pages/today.html">▶ Heute lernen — geführte Session</a>
+        <a class="btn lg" href="pages/plan.html">Tagesplan ansehen</a>
+        <a class="btn lg" href="pages/golden-rules.html">Goldene Regeln</a>
       </div>
     </div>
 
     <h2>Alle Bereiche (All sections)</h2>
     <div class="grid grid-3">
+      <a class="tile" href="pages/today.html">
+        <span class="ico">▶️</span>
+        <div class="t-title">Heute lernen</div>
+        <div class="t-desc">One guided session: review due cards, learn a few new ones, listen, then speak. ~15–20 min.</div>
+      </a>
+      <a class="tile" href="pages/progress.html">
+        <span class="ico">📊</span>
+        <div class="t-title">Fortschritt</div>
+        <div class="t-desc">Honest stats: streak, retention %, memory strength and your forgetting curve.</div>
+      </a>
       <a class="tile" href="pages/basics.html">
         <span class="ico">🧱</span>
         <div class="t-title">A1 Grundlagen</div>
         <div class="t-desc">Start here for A1: numbers, colours, greetings, time, question words, countries.</div>
+      </a>
+      <a class="tile" href="pages/fragen.html">
+        <span class="ico">❓</span>
+        <div class="t-title">W-Fragen</div>
+        <div class="t-desc">All question words with a memory system + Trap-Trainer. Stop mixing up <em>wer/wo/wie</em>.</div>
       </a>
       <a class="tile" href="pages/golden-rules.html">
         <span class="ico">⭐</span>
@@ -79,6 +95,31 @@
         <div class="t-title">Satzmuster (Speaking)</div>
         <div class="t-desc">Ready-made sentence frames for real conversations. Speak fluently.</div>
       </a>
+      <a class="tile" href="pages/future.html">
+        <span class="ico">⏳</span>
+        <div class="t-title">Zukunft & Lebenslauf</div>
+        <div class="t-desc">Talk about your whole life: <em>wollte</em>, <em>wurde</em>, <em>werde</em>, <em>würde</em> — past wishes to future plans.</div>
+      </a>
+      <a class="tile" href="pages/dialogs.html">
+        <span class="ico">🗣️</span>
+        <div class="t-title">Dialoge üben</div>
+        <div class="t-desc">Real conversations to practise with a partner. Hide one role and answer yourself.</div>
+      </a>
+      <a class="tile" href="pages/study.html">
+        <span class="ico">🧠</span>
+        <div class="t-title">Lernkarten (FSRS)</div>
+        <div class="t-desc">Smart spaced repetition. Two-way recall (DE↔EN), case-coloured example sentences, export/import your progress.</div>
+      </a>
+      <a class="tile" href="pages/listening.html">
+        <span class="ico">🎧</span>
+        <div class="t-title">Hören & Nachsprechen</div>
+        <div class="t-desc">Hands-free <strong>Listening Loop</strong> for passive review, plus <strong>Shadowing</strong> to copy rhythm and intonation. Adjustable speed.</div>
+      </a>
+      <a class="tile" href="pages/speaking.html">
+        <span class="ico">🎤</span>
+        <div class="t-title">Sprechen & Sätze bauen</div>
+        <div class="t-desc">Say the German out loud and let your mic check it, or build a whole sentence yourself and reveal the case-coloured model answer.</div>
+      </a>
       <a class="tile" href="pages/flashcards.html">
         <span class="ico">🃏</span>
         <div class="t-title">Karteikarten</div>
@@ -98,10 +139,14 @@
 
     <h2>Dein Fortschritt heute (Your progress today)</h2>
     <div class="card">
-      <div class="grid grid-3" id="dash-stats">
+      <div class="grid grid-4" id="dash-stats" style="gap:0.5rem;">
         <div class="stat"><div class="n" id="st-streak">0</div><div class="l">Tage am Stück (streak)</div></div>
-        <div class="stat"><div class="n" id="st-cards">0</div><div class="l">Karten heute geübt</div></div>
-        <div class="stat"><div class="n" id="st-plan">0%</div><div class="l">Tagesplan erledigt</div></div>
+        <div class="stat"><div class="n" id="st-due">0</div><div class="l">Karten fällig</div></div>
+        <div class="stat"><div class="n" id="st-cards">0</div><div class="l">heute geübt</div></div>
+        <div class="stat"><div class="n" id="st-plan">0%</div><div class="l">Tagesplan</div></div>
+      </div>
+      <div class="btn-row center" style="justify-content:center; margin:1rem 0 0;">
+        <a class="btn" href="pages/progress.html">📊 Ganzer Fortschritt</a>
       </div>
     </div>
 
@@ -113,6 +158,9 @@
   </main>
 
   <script src="js/app.js"></script>
+  <script src="js/data/cards.js"></script>
+  <script src="js/vendor/ts-fsrs.umd.js"></script>
+  <script src="js/progress.js"></script>
   <script>
     (function () {
       var streak = DE.load("streak", 0);
@@ -128,6 +176,8 @@
       }
       document.getElementById("st-streak").textContent = streak;
       document.getElementById("st-cards").textContent = DE.load("cardsToday", 0);
+      // FSRS cards due today (from the shared progress store)
+      if (window.PROG) document.getElementById("st-due").textContent = PROG.stats().due;
       var plan = DE.load("plan_" + today, {});
       var totalTasks = DE.load("planTotal", 8);
       var done = Object.keys(plan).filter(function (k) { return plan[k]; }).length;
