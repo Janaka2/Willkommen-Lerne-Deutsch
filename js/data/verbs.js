@@ -184,5 +184,19 @@ window.VERBS = [
   { inf: "buchstabieren", en: "to spell", er: "buchstabiert", perf: "hat buchstabiert", tags: [] },
   { inf: "kennenlernen", en: "to get to know / meet", er: "lernt kennen", perf: "hat kennengelernt", tags: ["separable"] },
   { inf: "einladen", en: "to invite", er: "lädt ein", perf: "hat eingeladen", tags: ["separable", "irregular"] },
-  { inf: "gratulieren", en: "to congratulate", er: "gratuliert", perf: "hat gratuliert", tags: ["+Dat"] }
+  { inf: "gratulieren", en: "to congratulate", er: "gratuliert", perf: "hat gratuliert", tags: ["+Dat"] },
+
+  /* ===== Aus dem Kurs: Technik & Reparatur (Linie 1) ===== */
+  { inf: "kündigen", en: "to cancel / terminate (a contract)", er: "kündigt", perf: "hat gekündigt", tags: [] },
+  { inf: "sich lohnen", en: "to be worth it", er: "lohnt sich", perf: "hat sich gelohnt", tags: ["reflexive"] },
+  { inf: "ausschalten", en: "to switch off", er: "schaltet aus", perf: "hat ausgeschaltet", tags: ["separable"] },
+  { inf: "einschalten", en: "to switch on", er: "schaltet ein", perf: "hat eingeschaltet", tags: ["separable"] },
+  { inf: "prüfen", en: "to check / test", er: "prüft", perf: "hat geprüft", tags: [] },
+  { inf: "speichern", en: "to save (data)", er: "speichert", perf: "hat gespeichert", tags: [] },
+  { inf: "funktionieren", en: "to work / function", er: "funktioniert", perf: "hat funktioniert", tags: [] },
+  { inf: "überlegen", en: "to think over / consider", er: "überlegt", perf: "hat überlegt", tags: [] },
+  { inf: "aufpassen", en: "to pay attention / be careful", er: "passt auf", perf: "hat aufgepasst", tags: ["separable"] },
+  { inf: "zuordnen", en: "to match / assign", er: "ordnet zu", perf: "hat zugeordnet", tags: ["separable"] },
+  { inf: "ankreuzen", en: "to tick / mark with a cross", er: "kreuzt an", perf: "hat angekreuzt", tags: ["separable"] },
+  { inf: "empfehlen", en: "to recommend", er: "empfiehlt", perf: "hat empfohlen", tags: ["irregular", "+Dat"] }
 ];

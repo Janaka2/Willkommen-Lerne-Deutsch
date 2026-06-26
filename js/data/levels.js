@@ -26,7 +26,10 @@ window.A2_NOUNS = new Set([
   // Travel & Transport
   "Bahn", "Haltestelle", "Koffer", "Ausweis", "Pass",
   // Technology & Media
-  "Nachricht",
+  "Nachricht", "Display", "Reparatur", "Modell", "Anschluss", "Druckerpatrone",
+  "USB-Stick", "Papierkorb",
+  // Work & Money
+  "Vertrag",
   // Everyday Objects
   "Schere",
   // Abstract & Useful
@@ -59,7 +62,10 @@ window.A2_VERBS = new Set([
   "verlieren", "gewinnen", "wechseln", "ändern", "bauen", "reparieren",
   "scheinen", "passieren", "legen", "stellen", "setzen",
   // extra additions
-  "kennenlernen", "einladen", "gratulieren"
+  "kennenlernen", "einladen", "gratulieren",
+  // from class: Technik & Reparatur
+  "kündigen", "sich lohnen", "prüfen", "speichern", "funktionieren",
+  "überlegen", "zuordnen", "ankreuzen", "empfehlen"
 ]);
 
 window.nounLevel = function (de) { return window.A2_NOUNS.has(de) ? "A2" : "A1"; };

@@ -297,5 +297,19 @@ window.NOUNS = [
   { de: "Land", art: "das", pl: "Länder", en: "country", cat: "City & Places" },
   { de: "Getränk", art: "das", pl: "Getränke", en: "drink / beverage", cat: "Food & Drink" },
   { de: "Ferien", art: "die", pl: "Ferien", en: "holidays / vacation (plural)", cat: "Time & Calendar" },
-  { de: "Lieblingsessen", art: "das", pl: "Lieblingsessen", en: "favourite food", cat: "Food & Drink" }
+  { de: "Lieblingsessen", art: "das", pl: "Lieblingsessen", en: "favourite food", cat: "Food & Drink" },
+
+  /* ===== Aus dem Kurs: Technik & Reparatur (Linie 1) ===== */
+  { de: "Handy", art: "das", pl: "Handys", en: "mobile phone", cat: "Technology & Media" },
+  { de: "Display", art: "das", pl: "Displays", en: "display / screen", cat: "Technology & Media" },
+  { de: "Vertrag", art: "der", pl: "Verträge", en: "contract", cat: "Work & Money" },
+  { de: "Reparatur", art: "die", pl: "Reparaturen", en: "repair", cat: "Technology & Media" },
+  { de: "Modell", art: "das", pl: "Modelle", en: "model", cat: "Technology & Media" },
+  { de: "Tipp", art: "der", pl: "Tipps", en: "tip / piece of advice", cat: "Abstract & Useful" },
+  { de: "Drucker", art: "der", pl: "Drucker", en: "printer", cat: "Technology & Media" },
+  { de: "Druckerpatrone", art: "die", pl: "Druckerpatronen", en: "printer cartridge", cat: "Technology & Media" },
+  { de: "Anschluss", art: "der", pl: "Anschlüsse", en: "connection / socket", cat: "Technology & Media" },
+  { de: "Kabel", art: "das", pl: "Kabel", en: "cable", cat: "Technology & Media" },
+  { de: "USB-Stick", art: "der", pl: "USB-Sticks", en: "USB stick", cat: "Technology & Media" },
+  { de: "Papierkorb", art: "der", pl: "Papierkörbe", en: "recycle bin / wastepaper basket", cat: "Technology & Media" }
 ];

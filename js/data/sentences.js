@@ -58,6 +58,20 @@ window.SENTENCE_GROUPS = [
     ]
   },
   {
+    title: "Mein Leben: früher, jetzt, später",
+    en: "My life: past, present, future (werden · wurde · wollte · würde)",
+    items: [
+      { de: "Mit ___ wollte ich ___ werden.", en: "At (age) ___ I wanted to become ___.", note: "wollte = wanted (past)" },
+      { de: "Als Kind wollte ich ___ werden.", en: "As a child I wanted to become ___." },
+      { de: "Mit ___ wurde ich ___.", en: "At (age) ___ I became ___.", note: "wurde = became (past)" },
+      { de: "Jetzt arbeite ich als ___.", en: "Now I work as ___." },
+      { de: "Mit ___ werde ich ___.", en: "At (age) ___ I will become ___.", note: "werde = future / become" },
+      { de: "Nächstes Jahr werde ich ___.", en: "Next year I will ___.", note: "werden + infinitive at end" },
+      { de: "In ___ Jahren werde ich ___ machen.", en: "In ___ years I will do ___." },
+      { de: "Eines Tages würde ich gern ___.", en: "One day I would love to ___.", note: "würde = would (dream)" }
+    ]
+  },
+  {
     title: "Über die Vergangenheit sprechen",
     en: "Talking about the past (Perfekt)",
     items: [
