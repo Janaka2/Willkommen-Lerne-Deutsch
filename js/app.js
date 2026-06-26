@@ -12,16 +12,24 @@
 
   var NAV = [
     { key: "index",        label: "Start",            href: "index.html" },
+    { key: "today",        label: "Heute lernen",     href: "pages/today.html" },
     { key: "plan",         label: "Tagesplan",        href: "pages/plan.html" },
     { key: "basics",       label: "A1 Grundlagen",    href: "pages/basics.html" },
+    { key: "fragen",       label: "W-Fragen",         href: "pages/fragen.html" },
     { key: "golden-rules", label: "Goldene Regeln",   href: "pages/golden-rules.html" },
     { key: "grammar",      label: "Grammatik",        href: "pages/grammar.html" },
     { key: "cases",        label: "Fälle (Cases)",    href: "pages/cases.html" },
     { key: "nouns",        label: "Nomen",            href: "pages/nouns.html" },
     { key: "verbs",        label: "Verben",           href: "pages/verbs.html" },
     { key: "sentences",    label: "Sätze",            href: "pages/sentences.html" },
+    { key: "future",       label: "Zukunft",          href: "pages/future.html" },
+    { key: "dialogs",      label: "Dialoge",          href: "pages/dialogs.html" },
+    { key: "study",        label: "Lernkarten (FSRS)", href: "pages/study.html" },
+    { key: "listening",    label: "Hören & Nachsprechen", href: "pages/listening.html" },
+    { key: "speaking",     label: "Sprechen",         href: "pages/speaking.html" },
     { key: "flashcards",   label: "Karteikarten",     href: "pages/flashcards.html" },
-    { key: "quiz",         label: "Quiz",             href: "pages/quiz.html" }
+    { key: "quiz",         label: "Quiz",             href: "pages/quiz.html" },
+    { key: "progress",     label: "Fortschritt",      href: "pages/progress.html" }
   ];
 
   function buildNav() {
@@ -96,15 +104,33 @@
     speechSynthesis.onvoiceschanged = pickVoice;
   }
 
-  function speak(text) {
-    if (!window.speechSynthesis || !text) return;
+  /* Speaking rate is user-adjustable and persisted, so every 🔊 button,
+     flashcard, and the Listening Loop all use the same chosen speed. */
+  function getRate() {
+    var r = parseFloat(load("ttsRate", 0.9));
+    return isNaN(r) ? 0.9 : Math.min(1.3, Math.max(0.5, r));
+  }
+  function setRate(r) { store("ttsRate", r); }
+
+  /* speak(text[, opts]) — opts: { rate, onend, onstart }.
+     Returns the utterance (or null if TTS unavailable) so callers can
+     chain audio (Listening Loop / Shadowing) off the onend callback. */
+  function speak(text, opts) {
+    if (!window.speechSynthesis || !text) return null;
+    opts = opts || {};
     speechSynthesis.cancel();
     var u = new SpeechSynthesisUtterance(text);
     u.lang = "de-DE";
-    u.rate = 0.92;
+    u.rate = opts.rate || getRate();
     if (deVoice) u.voice = deVoice;
+    if (typeof opts.onstart === "function") u.onstart = opts.onstart;
+    if (typeof opts.onend === "function") u.onend = opts.onend;
     speechSynthesis.speak(u);
+    return u;
   }
+
+  /* True if the browser can speak (used to degrade gracefully). */
+  function canSpeak() { return !!window.speechSynthesis; }
 
   /* Make a small "speak" button element */
   function sayButton(text) {
@@ -150,6 +176,9 @@
   /* ---------- Expose ---------- */
   window.DE = {
     speak: speak,
+    canSpeak: canSpeak,
+    getRate: getRate,
+    setRate: setRate,
     sayButton: sayButton,
     wireAudio: wireAudio,
     store: store,
