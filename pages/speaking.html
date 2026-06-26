@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sprechen & Sätze bauen — Deutsch A2</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body data-page="speaking">
+  <main class="container narrow">
+    <p class="eyebrow">Output macht dich flüssig · selbst produzieren</p>
+    <h1 class="page-title">🎤 Sprechen & Sätze bauen</h1>
+    <p class="page-sub">
+      Listening builds the model in your head — but <strong>producing</strong> German is what makes you
+      speak. Two modes: <strong>Sprich die Antwort</strong> uses your microphone (Web Speech API) to hear
+      you say the German and check it. <strong>Satz bauen</strong> makes you build a whole sentence
+      yourself from an English prompt, then reveals the model answer with <em>case colours</em> so you
+      see exactly which grammar made it right. Speech recognition works best in <strong>Chrome/Edge</strong>.
+    </p>
+
+    <div class="controls">
+      <span class="muted" style="font-weight:700;">Modus:</span>
+      <button class="chip active" data-mode="speak">🎤 Sprich die Antwort</button>
+      <button class="chip" data-mode="drill">✍️ Satz bauen</button>
+    </div>
+
+    <!-- Browser-support note (shown if speech recognition is unavailable) -->
+    <div class="callout warn" id="no-sr" style="display:none;">
+      <div class="c-head">⚠️ Spracherkennung nicht verfügbar</div>
+      Dein Browser unterstützt die Spracherkennung (SpeechRecognition) nicht — am besten funktioniert sie
+      in <strong>Chrome</strong> oder <strong>Edge</strong>. Du kannst trotzdem üben: sprich laut für dich
+      und nutze <strong>„Antwort zeigen"</strong> zum Vergleichen. Im Modus „Satz bauen" kannst du deine
+      Antwort auch <strong>tippen</strong>.
+    </div>
+
+    <!-- ===================== SPEAK MODE ===================== -->
+    <section id="panel-speak">
+      <div class="controls">
+        <span class="muted" style="font-weight:700;">Niveau:</span>
+        <button class="chip active" data-sl="all">Alle</button>
+        <button class="chip" data-sl="A1"><span class="pill lvl-a1">A1</span></button>
+        <button class="chip" data-sl="A2"><span class="pill lvl-a2">A2</span></button>
+        <button class="chip" data-sl="B1">B1</button>
+      </div>
+
+      <div class="card" style="text-align:center;">
+        <div class="muted" style="font-weight:700; text-transform:uppercase; font-size:0.8rem; letter-spacing:0.04em;">Sag das auf Deutsch:</div>
+        <div class="drill-prompt" id="sp-en" style="margin:0.5rem 0;">—</div>
+        <div class="listen-word" id="sp-hint"></div>
+
+        <div style="margin:1.2rem 0;">
+          <button class="mic-btn" id="mic-speak" title="Sprich jetzt">🎤</button>
+        </div>
+        <div class="sr-transcript" id="tr-speak"></div>
+        <div class="feedback" id="fb-speak"></div>
+
+        <div id="reveal-speak" style="display:none; margin-top:1rem;">
+          <hr class="soft" style="margin:1rem 0;">
+          <div class="muted" style="font-size:0.85rem;">Modell-Antwort:</div>
+          <div class="model-answer" id="sp-model"></div>
+          <div class="fc-example-en" id="sp-model-en"></div>
+        </div>
+      </div>
+
+      <div class="btn-row center" style="justify-content:center;">
+        <button class="btn" id="show-speak">Antwort zeigen 🔊</button>
+        <button class="btn primary" id="next-speak">Weiter →</button>
+      </div>
+    </section>
+
+    <!-- ===================== DRILL MODE ===================== -->
+    <section id="panel-drill" style="display:none;">
+      <div class="controls">
+        <span class="muted" style="font-weight:700;">Niveau:</span>
+        <button class="chip active" data-dl="all">Alle</button>
+        <button class="chip" data-dl="A1"><span class="pill lvl-a1">A1</span></button>
+        <button class="chip" data-dl="A2"><span class="pill lvl-a2">A2</span></button>
+        <button class="chip" data-dl="B1">B1</button>
+      </div>
+
+      <div class="card">
+        <div class="muted" style="font-weight:700; text-transform:uppercase; font-size:0.8rem; letter-spacing:0.04em;">Bau den ganzen Satz auf Deutsch:</div>
+        <div class="drill-prompt" id="dr-en" style="margin:0.5rem 0;">—</div>
+        <div class="listen-word" id="dr-hint" style="margin-bottom:0.8rem;"></div>
+
+        <textarea class="drill-input" id="dr-ta" placeholder="Tippe deinen Satz … (oder nutze 🎤)"></textarea>
+        <div class="btn-row" style="margin:0.7rem 0 0;">
+          <button class="btn" id="mic-drill" title="Diktieren">🎤 Diktieren</button>
+          <button class="btn primary" id="check-drill">Prüfen</button>
+          <button class="btn" id="show-drill">Modell zeigen 🔊</button>
+        </div>
+        <div class="feedback" id="fb-drill"></div>
+
+        <div id="reveal-drill" style="display:none; margin-top:1rem;">
+          <hr class="soft" style="margin:1rem 0;">
+          <div class="muted" style="font-size:0.85rem;">Modell-Antwort:</div>
+          <div class="model-answer" id="dr-model"></div>
+          <div class="listen-word" id="dr-missing" style="margin-top:0.5rem;"></div>
+        </div>
+      </div>
+
+      <div class="btn-row center" style="justify-content:center;">
+        <button class="btn primary" id="next-drill">Weiter →</button>
+      </div>
+    </section>
+
+    <div class="callout" style="margin-top:1.5rem;">
+      <div class="c-head">So holst du am meisten raus</div>
+      Try to produce the sentence <strong>before</strong> you reveal — a wrong guess you then correct
+      sticks far better than a right answer you only read. The first time you use the mic, your browser
+      will ask for microphone permission. The model answers reuse the same
+      <span class="c-nom">Nom</span> · <span class="c-akk">Akk</span> · <span class="c-dat">Dat</span> ·
+      <span class="c-gen">Gen</span> colours as the rest of the site.
+    </div>
+  </main>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/data/cards.js"></script>
+  <script src="../js/data/drills.js"></script>
+  <script>
+    /* =========================================================================
+       Sprechen & Sätze bauen — Web Speech API recognition + output drills.
+       No network, no build step. Recognition needs Chrome/Edge + mic permission;
+       everything degrades gracefully (typing + reveal) when it's missing.
+       ========================================================================= */
+    (function () {
+      "use strict";
+
+      /* ---- Text helpers ---- */
+      function stripHtml(html) {
+        var d = document.createElement("div");
+        d.innerHTML = html;
+        return d.textContent || "";
+      }
+      function norm(s) {
+        return (s || "").toLowerCase()
+          .replace(/[.,!?;:"'„“”()\-–—]/g, "")
+          .replace(/\s+/g, " ").trim();
+      }
+      function deburr(s) {
+        return s.replace(/ä/g, "a").replace(/ö/g, "o").replace(/ü/g, "u").replace(/ß/g, "ss");
+      }
+
+      /* Score a spoken/typed attempt against the target sentence.
+         Returns { level: "ok"|"close"|"bad", ratio, missing:[words] }. */
+      function score(target, attempt) {
+        var t = norm(target), a = norm(attempt);
+        var tw = t ? t.split(" ") : [];
+        if (!a) return { level: "bad", ratio: 0, missing: tw };
+        if (t === a || deburr(t) === deburr(a)) return { level: "ok", ratio: 1, missing: [] };
+        var aset = a.split(" ");
+        var missing = [];
+        var hit = 0;
+        tw.forEach(function (w) {
+          var found = aset.some(function (x) { return x === w || deburr(x) === deburr(w); });
+          if (found) hit++; else missing.push(w);
+        });
+        var ratio = tw.length ? hit / tw.length : 0;
+        return { level: ratio >= 0.6 ? "close" : "bad", ratio: ratio, missing: missing };
+      }
+
+      /* ---- Speech recognition factory (null if unsupported) ---- */
+      var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      function makeRecognizer(handlers) {
+        if (!SR) return null;
+        var r = new SR();
+        r.lang = "de-DE";
+        r.interimResults = true;
+        r.maxAlternatives = 3;
+        r.continuous = false;
+        r.onresult = function (e) {
+          var finalT = "", interim = "", alts = [];
+          for (var i = e.resultIndex; i < e.results.length; i++) {
+            var res = e.results[i];
+            if (res.isFinal) {
+              finalT += res[0].transcript;
+              for (var j = 0; j < res.length; j++) alts.push(res[j].transcript);
+            } else {
+              interim += res[0].transcript;
+            }
+          }
+          handlers.onresult(finalT.trim(), interim.trim(), alts);
+        };
+        r.onerror = function (e) { if (handlers.onerror) handlers.onerror(e); };
+        r.onend = function () { if (handlers.onend) handlers.onend(); };
+        return r;
+      }
+      var srSupported = !!SR;
+      if (!srSupported) document.getElementById("no-sr").style.display = "block";
+
+      function showFeedback(el, level, html) {
+        el.className = "feedback show " + level;
+        el.innerHTML = html;
+      }
+      function bestScore(target, alts) {
+        // pick the alternative that scores best
+        var best = { level: "bad", ratio: -1, missing: [] };
+        (alts.length ? alts : [""]).forEach(function (a) {
+          var s = score(target, a);
+          if (s.ratio > best.ratio) best = s;
+        });
+        return best;
+      }
+
+      /* =====================================================================
+         SPEAK MODE
+         ===================================================================== */
+      var speakLevel = "all";
+      var spCard = null;
+      var spRevealed = false;
+
+      function spPool() {
+        return (window.CARDS || []).filter(function (c) {
+          return speakLevel === "all" || c.level === speakLevel;
+        });
+      }
+      function spNext() {
+        var pool = spPool();
+        spCard = pool[Math.floor(Math.random() * pool.length)] || null;
+        spRevealed = false;
+        document.getElementById("tr-speak").innerHTML = "";
+        document.getElementById("fb-speak").className = "feedback";
+        document.getElementById("reveal-speak").style.display = "none";
+        if (!spCard) {
+          document.getElementById("sp-en").textContent = "Keine Karten in dieser Auswahl.";
+          document.getElementById("sp-hint").textContent = "";
+          return;
+        }
+        document.getElementById("sp-en").textContent = spCard.exEn;
+        document.getElementById("sp-hint").textContent =
+          "💡 " + spCard.de + " — " + spCard.en + "  ·  " + spCard.level + " · " + spCard.theme;
+      }
+      function spReveal() {
+        if (!spCard) return;
+        spRevealed = true;
+        document.getElementById("sp-model").innerHTML = spCard.ex;
+        document.getElementById("sp-model-en").textContent = spCard.exEn;
+        document.getElementById("reveal-speak").style.display = "block";
+        DE.speak(stripHtml(spCard.ex));
+      }
+
+      var micSpeak = document.getElementById("mic-speak");
+      var speakRec = null, speakListening = false;
+      function speakStop() {
+        if (speakRec) { try { speakRec.stop(); } catch (e) {} }
+        speakListening = false;
+        micSpeak.classList.remove("listening");
+      }
+      micSpeak.addEventListener("click", function () {
+        if (!srSupported) { document.getElementById("no-sr").scrollIntoView({ behavior: "smooth" }); return; }
+        if (speakListening) { speakStop(); return; }
+        if (!spCard) return;
+        var target = stripHtml(spCard.ex);
+        var tr = document.getElementById("tr-speak");
+        tr.innerHTML = "<em>Hört zu …</em>";
+        document.getElementById("fb-speak").className = "feedback";
+        speakRec = makeRecognizer({
+          onresult: function (finalT, interim, alts) {
+            if (interim && !finalT) { tr.innerHTML = '<span class="heard">' + interim + "</span> …"; return; }
+            if (finalT) {
+              tr.innerHTML = 'Gehört: <span class="heard">' + finalT + "</span>";
+              var s = bestScore(target, alts);
+              var fb = document.getElementById("fb-speak");
+              if (s.level === "ok") showFeedback(fb, "ok", "✓ Perfekt! Genau richtig.");
+              else if (s.level === "close") showFeedback(fb, "close",
+                "Fast! Vergleiche mit der Modell-Antwort unten.");
+              else showFeedback(fb, "bad", "Noch nicht ganz — sieh dir die Modell-Antwort an und versuch's nochmal.");
+              spReveal();
+            }
+          },
+          onend: function () { speakListening = false; micSpeak.classList.remove("listening"); },
+          onerror: function (e) {
+            tr.innerHTML = '<span class="muted">Fehler: ' + (e.error || "unbekannt") +
+              " — bitte Mikrofon-Erlaubnis prüfen.</span>";
+          }
+        });
+        speakListening = true;
+        micSpeak.classList.add("listening");
+        try { speakRec.start(); } catch (e) { speakStop(); }
+      });
+
+      document.getElementById("show-speak").addEventListener("click", spReveal);
+      document.getElementById("next-speak").addEventListener("click", function () { speakStop(); spNext(); });
+      document.querySelectorAll(".chip[data-sl]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          speakLevel = b.dataset.sl;
+          document.querySelectorAll(".chip[data-sl]").forEach(function (x) { x.classList.remove("active"); });
+          b.classList.add("active");
+          spNext();
+        });
+      });
+
+      /* =====================================================================
+         DRILL MODE
+         ===================================================================== */
+      var drillLevel = "all";
+      var drill = null;
+
+      function drPool() {
+        return (window.DRILLS || []).filter(function (d) {
+          return drillLevel === "all" || d.level === drillLevel;
+        });
+      }
+      function drNext() {
+        var pool = drPool();
+        drill = pool[Math.floor(Math.random() * pool.length)] || null;
+        document.getElementById("dr-ta").value = "";
+        document.getElementById("fb-drill").className = "feedback";
+        document.getElementById("reveal-drill").style.display = "none";
+        document.getElementById("dr-missing").textContent = "";
+        if (!drill) { document.getElementById("dr-en").textContent = "Keine Übungen in dieser Auswahl."; document.getElementById("dr-hint").textContent = ""; return; }
+        document.getElementById("dr-en").textContent = drill.en;
+        document.getElementById("dr-hint").textContent = drill.hint ? "💡 " + drill.hint : "";
+      }
+      function drReveal() {
+        if (!drill) return;
+        document.getElementById("dr-model").innerHTML = drill.de;
+        document.getElementById("reveal-drill").style.display = "block";
+        var attempt = document.getElementById("dr-ta").value;
+        var miss = score(stripHtml(drill.de), attempt);
+        var missEl = document.getElementById("dr-missing");
+        if (!norm(attempt)) missEl.textContent = "";
+        else if (!miss.missing.length) missEl.innerHTML = "✓ Du hattest alle wichtigen Wörter.";
+        else missEl.innerHTML = "Fehlt noch: <strong>" + miss.missing.join(", ") + "</strong>";
+        DE.speak(stripHtml(drill.de));
+      }
+      function drCheck() {
+        if (!drill) return;
+        var attempt = document.getElementById("dr-ta").value;
+        var fb = document.getElementById("fb-drill");
+        if (!norm(attempt)) { showFeedback(fb, "bad", "Schreib (oder sprich) zuerst deinen Satz."); return; }
+        var s = score(stripHtml(drill.de), attempt);
+        if (s.level === "ok") showFeedback(fb, "ok", "✓ Sehr gut! Das passt.");
+        else if (s.level === "close") showFeedback(fb, "close", "Fast! Schau dir die Modell-Antwort an.");
+        else showFeedback(fb, "bad", "Noch nicht ganz — zeig dir die Modell-Antwort.");
+        drReveal();
+      }
+
+      document.getElementById("check-drill").addEventListener("click", drCheck);
+      document.getElementById("show-drill").addEventListener("click", drReveal);
+      document.getElementById("next-drill").addEventListener("click", drNext);
+      document.querySelectorAll(".chip[data-dl]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          drillLevel = b.dataset.dl;
+          document.querySelectorAll(".chip[data-dl]").forEach(function (x) { x.classList.remove("active"); });
+          b.classList.add("active");
+          drNext();
+        });
+      });
+
+      // Dictation into the drill textarea
+      var micDrill = document.getElementById("mic-drill");
+      var drillRec = null, drillListening = false;
+      micDrill.addEventListener("click", function () {
+        if (!srSupported) { document.getElementById("no-sr").scrollIntoView({ behavior: "smooth" }); return; }
+        if (drillListening) { try { drillRec.stop(); } catch (e) {} return; }
+        var ta = document.getElementById("dr-ta");
+        drillRec = makeRecognizer({
+          onresult: function (finalT, interim) { if (finalT) ta.value = finalT; else if (interim) ta.value = interim; },
+          onend: function () { drillListening = false; micDrill.textContent = "🎤 Diktieren"; },
+          onerror: function (e) { ta.placeholder = "Mikrofon-Fehler: " + (e.error || "?"); }
+        });
+        drillListening = true;
+        micDrill.textContent = "⏹ Stopp";
+        try { drillRec.start(); } catch (e) { drillListening = false; micDrill.textContent = "🎤 Diktieren"; }
+      });
+
+      /* =====================================================================
+         Mode switching
+         ===================================================================== */
+      document.querySelectorAll(".chip[data-mode]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var mode = b.dataset.mode;
+          document.querySelectorAll(".chip[data-mode]").forEach(function (x) { x.classList.remove("active"); });
+          b.classList.add("active");
+          speakStop();
+          document.getElementById("panel-speak").style.display = mode === "speak" ? "block" : "none";
+          document.getElementById("panel-drill").style.display = mode === "drill" ? "block" : "none";
+        });
+      });
+
+      // Enter key in textarea = check (Shift+Enter = newline)
+      document.getElementById("dr-ta").addEventListener("keydown", function (e) {
+        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); drCheck(); }
+      });
+
+      // Expose pure logic for testing without a real microphone.
+      window.SPEAKING = { score: score, bestScore: bestScore, norm: norm };
+
+      // Init
+      spNext();
+      drNext();
+    })();
+  </script>
+</body>
+</html>

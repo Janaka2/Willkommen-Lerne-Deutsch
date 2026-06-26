@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fortschritt — Deutsch A2</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body data-page="progress">
+  <main class="container narrow">
+    <p class="eyebrow">Ehrliche Zahlen · keine leeren Punkte</p>
+    <h1 class="page-title">📊 Dein Fortschritt</h1>
+    <p class="page-sub">
+      These numbers come straight from your own reviews — no vanity points. They show what you've
+      genuinely learned and how strong each memory is right now, so you can trust them to decide what
+      to do next.
+    </p>
+
+    <!-- Key stats -->
+    <div class="dash-grid" style="margin-bottom:1.5rem;">
+      <div class="dash-stat"><div class="n accent" id="s-streak">0</div><div class="l">Tage am Stück 🔥</div></div>
+      <div class="dash-stat"><div class="n" id="s-due">0</div><div class="l">heute fällig</div></div>
+      <div class="dash-stat"><div class="n good" id="s-ret">–</div><div class="l">Behaltensrate</div></div>
+      <div class="dash-stat"><div class="n" id="s-seen">0</div><div class="l">Wörter gelernt</div></div>
+      <div class="dash-stat"><div class="n" id="s-strong">0</div><div class="l">gefestigt (>3 Wo)</div></div>
+      <div class="dash-stat"><div class="n" id="s-today">0</div><div class="l">heute geübt</div></div>
+    </div>
+
+    <!-- Memory strength -->
+    <div class="card">
+      <h2 style="margin-top:0;">🧠 Gedächtnis-Stärke</h2>
+      <p class="muted" style="margin-top:0;">
+        How long each memory currently lasts before it needs a refresh. Bars further right = stronger,
+        longer-lasting memories. The goal is to keep moving cards rightward.
+      </p>
+      <div class="chart-wrap"><canvas id="chart-strength" height="200"></canvas></div>
+      <p class="center muted" id="strength-empty" style="display:none;">
+        Noch keine Daten — übe ein paar <a href="study.html">Karten</a>, dann erscheint hier deine Stärke-Verteilung.
+      </p>
+    </div>
+
+    <!-- Forgetting curve -->
+    <div class="card">
+      <h2 style="margin-top:0;">📉 Vergessenskurve (Durchschnittskarte)</h2>
+      <p class="muted" style="margin-top:0;">
+        Without review, memory fades along this curve. We schedule each card to come back when it drops
+        to about <strong>90 %</strong> — the dotted line — so you review right before forgetting, not after.
+      </p>
+      <div class="chart-wrap"><canvas id="chart-curve" height="220"></canvas></div>
+      <p class="center muted" id="curve-info"></p>
+    </div>
+
+    <!-- Recent activity -->
+    <div class="card">
+      <h2 style="margin-top:0;">🗓️ Letzte 14 Tage</h2>
+      <p class="muted" style="margin-top:0;">Reviews per day. Aim for an unbroken row — consistency is the whole game.</p>
+      <div class="chart-wrap"><canvas id="chart-activity" height="150"></canvas></div>
+    </div>
+
+    <div class="btn-row center" style="justify-content:center;">
+      <a class="btn primary lg" href="today.html">▶ Heute lernen</a>
+      <a class="btn lg" href="study.html">Lernkarten</a>
+    </div>
+
+    <div class="callout" style="margin-top:1.5rem;">
+      <div class="c-head">Warum diese Zahlen ehrlich sind</div>
+      „Behaltensrate" = how often you actually recalled a card correctly (anything but <em>Nochmal</em>),
+      across <span id="rev-total">0</span> reviews. „Gefestigt" counts only cards your memory now holds for
+      more than three weeks. Back up everything anytime via Export on the
+      <a href="study.html">Lernkarten</a>-Seite.
+    </div>
+  </main>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/data/cards.js"></script>
+  <script src="../js/vendor/ts-fsrs.umd.js"></script>
+  <script src="../js/progress.js"></script>
+  <script>
+    (function () {
+      "use strict";
+      var S = PROG.stats();
+
+      // ---- numbers ----
+      document.getElementById("s-streak").textContent = S.streak;
+      document.getElementById("s-due").textContent = S.due;
+      document.getElementById("s-ret").textContent = (S.retention === null ? "–" : S.retention + "%");
+      document.getElementById("s-seen").textContent = S.wordsSeen;
+      document.getElementById("s-strong").textContent = S.wordsStrong;
+      document.getElementById("s-today").textContent = S.cardsToday;
+      document.getElementById("rev-total").textContent = S.reviewedTotal;
+
+      // ---- theme colours from CSS ----
+      function cssVar(name) { return getComputedStyle(document.body).getPropertyValue(name).trim(); }
+      var COL = {
+        accent: cssVar("--accent") || "#3b82f6",
+        good: cssVar("--good") || "#1e8a4c",
+        muted: cssVar("--muted") || "#888",
+        border: cssVar("--border") || "#ccc",
+        text: cssVar("--text") || "#222",
+        nom: cssVar("--nom"), akk: cssVar("--akk"), dat: cssVar("--dat"), gen: cssVar("--gen")
+      };
+
+      // Make a canvas crisp at its CSS pixel width.
+      function fit(canvas) {
+        var w = canvas.parentElement.clientWidth || 600;
+        var dpr = window.devicePixelRatio || 1;
+        canvas.style.width = w + "px";
+        canvas.width = Math.floor(w * dpr);
+        canvas.height = Math.floor(canvas.height); // keep attr height
+        var ctx = canvas.getContext("2d");
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return { ctx: ctx, w: w, h: canvas.height / dpr };
+      }
+
+      // ================= Memory-strength bars =================
+      function drawStrength() {
+        var canvas = document.getElementById("chart-strength");
+        var labels = ["Lernen\n<1 T", "1–7 T", "1–4 Wo", "1–3 Mo", "3 Mo+"];
+        var colors = [COL.akk, COL.dat, COL.accent, COL.good, COL.gen];
+        var data = S.buckets;
+        var maxV = Math.max(1, Math.max.apply(null, data));
+        var any = data.some(function (v) { return v > 0; });
+        if (!any) { document.getElementById("strength-empty").style.display = "block"; canvas.style.display = "none"; return; }
+        var f = fit(canvas), ctx = f.ctx, W = f.w, H = f.h;
+        ctx.clearRect(0, 0, W, H);
+        var pad = 28, bw = (W - pad * 2) / data.length, base = H - 34;
+        data.forEach(function (v, i) {
+          var bh = Math.round((v / maxV) * (base - 14));
+          var x = pad + i * bw, y = base - bh;
+          ctx.fillStyle = colors[i] || COL.accent;
+          ctx.fillRect(x + bw * 0.12, y, bw * 0.76, bh);
+          ctx.fillStyle = COL.text;
+          ctx.font = "700 13px system-ui, sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText(String(v), x + bw / 2, y - 5);
+          ctx.fillStyle = COL.muted;
+          ctx.font = "11px system-ui, sans-serif";
+          labels[i].split("\n").forEach(function (line, li) { ctx.fillText(line, x + bw / 2, base + 14 + li * 12); });
+        });
+      }
+
+      // ================= Forgetting curve =================
+      function drawCurve() {
+        var canvas = document.getElementById("chart-curve");
+        var Sstab = S.avgStability;
+        var info = document.getElementById("curve-info");
+        if (!Sstab || Sstab <= 0) {
+          info.textContent = "Noch keine Wiederholungskarten — die Kurve erscheint, sobald du Karten festigst.";
+          canvas.style.display = "none"; return;
+        }
+        info.textContent = "Durchschnittliche Stabilität: ~" + Sstab.toFixed(1) +
+          " Tage (so lange hält eine typische Karte, bevor sie auf 90 % fällt).";
+        var f = fit(canvas), ctx = f.ctx, W = f.w, H = f.h;
+        ctx.clearRect(0, 0, W, H);
+        var padL = 38, padR = 12, padT = 12, padB = 26;
+        var x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
+        var maxDays = Math.max(10, Math.ceil(Sstab * 3));
+        function X(d) { return x0 + (d / maxDays) * (x1 - x0); }
+        function Y(r) { return y1 - r * (y1 - y0); }
+        // axes
+        ctx.strokeStyle = COL.border; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x0, y1); ctx.lineTo(x1, y1); ctx.stroke();
+        // 90% target dotted line
+        ctx.strokeStyle = COL.muted; ctx.setLineDash([4, 4]);
+        ctx.beginPath(); ctx.moveTo(x0, Y(0.9)); ctx.lineTo(x1, Y(0.9)); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = COL.muted; ctx.font = "11px system-ui, sans-serif"; ctx.textAlign = "left";
+        ctx.fillText("90% (Wiederholung)", x0 + 4, Y(0.9) - 4);
+        ctx.textAlign = "right";
+        ctx.fillText("100%", x0 - 4, Y(1) + 4); ctx.fillText("50%", x0 - 4, Y(0.5) + 4);
+        ctx.textAlign = "center";
+        ctx.fillText("0", X(0), y1 + 14); ctx.fillText(maxDays + " Tage", X(maxDays), y1 + 14);
+        // curve
+        ctx.strokeStyle = COL.accent; ctx.lineWidth = 2.5; ctx.beginPath();
+        for (var d = 0; d <= maxDays; d += maxDays / 120) {
+          var r = PROG.retrievability(d, Sstab);
+          var px = X(d), py = Y(r);
+          if (d === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+      }
+
+      // ================= Activity (last 14 days) =================
+      function drawActivity() {
+        var canvas = document.getElementById("chart-activity");
+        var days = [];
+        for (var i = 13; i >= 0; i--) {
+          var dt = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
+          days.push({ date: dt, n: (S.days[dt] && S.days[dt].reviewed) || 0 });
+        }
+        var maxV = Math.max(1, Math.max.apply(null, days.map(function (d) { return d.n; })));
+        var f = fit(canvas), ctx = f.ctx, W = f.w, H = f.h;
+        ctx.clearRect(0, 0, W, H);
+        var pad = 8, bw = (W - pad * 2) / days.length, base = H - 18;
+        days.forEach(function (d, i) {
+          var bh = Math.round((d.n / maxV) * (base - 16));
+          var x = pad + i * bw;
+          ctx.fillStyle = d.n ? COL.good : COL.border;
+          ctx.fillRect(x + bw * 0.15, base - bh, bw * 0.7, Math.max(d.n ? 3 : 2, bh));
+          if (d.n) { ctx.fillStyle = COL.text; ctx.font = "10px system-ui, sans-serif"; ctx.textAlign = "center"; ctx.fillText(String(d.n), x + bw / 2, base - bh - 4); }
+          ctx.fillStyle = COL.muted; ctx.font = "9px system-ui, sans-serif"; ctx.textAlign = "center";
+          ctx.fillText(d.date.slice(5), x + bw / 2, base + 12);
+        });
+      }
+
+      function drawAll() { drawStrength(); drawCurve(); drawActivity(); }
+      drawAll();
+      var rt; window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(drawAll, 150); });
+    })();
+  </script>
+</body>
+</html>

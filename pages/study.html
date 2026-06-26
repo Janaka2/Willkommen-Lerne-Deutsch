@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lernkarten (FSRS) — Deutsch A2</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body data-page="study">
+  <main class="container narrow">
+    <p class="eyebrow">Spaced Repetition · FSRS · aktives Erinnern</p>
+    <h1 class="page-title">🧠 Lernkarten (FSRS)</h1>
+    <p class="page-sub">
+      Modern spaced repetition with the <strong>FSRS</strong> algorithm. Each card comes back
+      <em>right before you'd forget it</em>. Cards are <strong>two-way</strong>: you recall the meaning
+      (DE → EN) <em>and</em> produce the German (EN → DE). Try to <strong>say the answer out loud</strong>
+      before you flip — that active recall is what builds speaking fluency. Everything is saved on this
+      device only; use <strong>Export</strong> to back up or move to another device.
+    </p>
+
+    <!-- Case-colour legend: the four cases, used in every example sentence -->
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="case-legend">
+        <strong style="margin-right:0.3rem;">Fälle (cases):</strong>
+        <span class="lg"><span class="dot nom"></span> Nominativ</span>
+        <span class="lg"><span class="dot akk"></span> Akkusativ</span>
+        <span class="lg"><span class="dot dat"></span> Dativ</span>
+        <span class="lg"><span class="dot gen"></span> Genitiv</span>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="controls">
+      <span class="muted" style="font-weight:700;">Richtung:</span>
+      <button class="chip active" data-dir="both">Beide</button>
+      <button class="chip" data-dir="recognition">DE → EN</button>
+      <button class="chip" data-dir="production">EN → DE</button>
+    </div>
+    <div class="controls">
+      <span class="muted" style="font-weight:700;">Niveau:</span>
+      <button class="chip active" data-l="all">Alle</button>
+      <button class="chip" data-l="A1"><span class="pill lvl-a1">A1</span></button>
+      <button class="chip" data-l="A2"><span class="pill lvl-a2">A2</span></button>
+      <button class="chip" data-l="B1">B1</button>
+    </div>
+    <div class="controls">
+      <span class="muted" style="font-weight:700;">Thema:</span>
+      <select id="themeSel" class="chip" style="padding:0.35rem 0.6rem;"></select>
+      <span style="flex:1"></span>
+      <label class="muted" style="font-size:0.85rem; display:flex; align-items:center; gap:0.3rem;">
+        neue/Tag
+        <input id="newLimit" type="number" min="0" max="100" value="15"
+               style="width:3.5rem; padding:0.25rem; font:inherit;" />
+      </label>
+    </div>
+
+    <!-- Stats -->
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="grid grid-4" style="gap:0.5rem;">
+        <div class="stat"><div class="n" id="st-due">0</div><div class="l">fällig (due)</div></div>
+        <div class="stat"><div class="n" id="st-new">0</div><div class="l">neu verfügbar</div></div>
+        <div class="stat"><div class="n" id="st-learned">0</div><div class="l">gefestigt</div></div>
+        <div class="stat"><div class="n" id="st-today">0</div><div class="l">heute geübt</div></div>
+      </div>
+    </div>
+
+    <!-- Card -->
+    <div class="fc-stage">
+      <div class="flashcard" id="card">
+        <div class="fc-inner">
+          <div class="fc-face fc-front">
+            <div>
+              <div class="fc-dir-badge" id="front-badge">DE → EN</div>
+              <div class="fc-word" id="front-word">—</div>
+              <div class="fc-example" id="front-ex"></div>
+              <div class="fc-hint">Sag die Antwort laut · dann Leertaste zum Umdrehen</div>
+            </div>
+          </div>
+          <div class="fc-face fc-back">
+            <div>
+              <div class="fc-word" id="back-word">—</div>
+              <div class="fc-example" id="back-ex"></div>
+              <div class="fc-example-en" id="back-ex-en"></div>
+              <div class="fc-tags" id="back-tags"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flip button -->
+    <div class="btn-row center" id="flip-row" style="justify-content:center;">
+      <button class="btn primary lg" id="btn-flip">Antwort zeigen (Leertaste)</button>
+    </div>
+
+    <!-- Rating buttons (shown after flip) -->
+    <div class="rate-row" id="rate-row" style="display:none;">
+      <button class="rate-btn again" id="r-again">
+        <span class="k">1 · Again</span><strong>Nochmal</strong><span class="ivl" id="ivl-1">—</span>
+      </button>
+      <button class="rate-btn hard" id="r-hard">
+        <span class="k">2 · Hard</span><strong>Schwer</strong><span class="ivl" id="ivl-2">—</span>
+      </button>
+      <button class="rate-btn good" id="r-good">
+        <span class="k">3 · Good</span><strong>Gut</strong><span class="ivl" id="ivl-3">—</span>
+      </button>
+      <button class="rate-btn easy" id="r-easy">
+        <span class="k">4 · Easy</span><strong>Leicht</strong><span class="ivl" id="ivl-4">—</span>
+      </button>
+    </div>
+
+    <p class="center muted" id="empty-msg" style="display:none;">
+      🎉 Alles erledigt! Keine Karten mehr fällig. Komm später wieder oder hol dir mehr neue Karten
+      (erhöhe „neue/Tag" oben).
+    </p>
+
+    <!-- Backup / restore -->
+    <div class="card" style="margin-top:1.5rem;">
+      <div class="c-head" style="font-weight:700; margin-bottom:0.5rem;">Fortschritt sichern</div>
+      <p class="muted" style="margin-top:0;">
+        Lade deinen kompletten Lernfortschritt als JSON-Datei herunter (Backup) oder spiele ihn auf
+        einem anderen Gerät wieder ein. So gehen deine Karten nie verloren.
+      </p>
+      <div class="btn-row" style="margin-bottom:0;">
+        <button class="btn" id="btn-export">⬇ Exportieren (JSON)</button>
+        <button class="btn" id="btn-import">⬆ Importieren (JSON)</button>
+        <input type="file" id="import-file" accept="application/json,.json" style="display:none;" />
+        <button class="btn" id="btn-reset" style="border-color:var(--bad);color:var(--bad);">Zurücksetzen</button>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:1.5rem;">
+      <div class="c-head">Wie FSRS funktioniert</div>
+      Be honest with your rating. <strong>Nochmal</strong> = you forgot (card returns very soon).
+      <strong>Schwer</strong> = right but hard. <strong>Gut</strong> = the normal answer.
+      <strong>Leicht</strong> = effortless (the interval jumps far ahead). FSRS learns your personal
+      forgetting curve and schedules each card for the moment you're about to forget it — aiming for
+      ~90% recall. The classic Leitner
+      <a href="flashcards.html">Karteikarten</a> deck still works too.
+    </div>
+  </main>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/data/cards.js"></script>
+  <!-- ts-fsrs UMD build: a classic global script (window.FSRS) so the page
+       also works when opened directly from disk (file://), where ES-module
+       imports are blocked by the browser. -->
+  <script src="../js/vendor/ts-fsrs.umd.js"></script>
+  <!-- Shared progress store: lets the dashboard show honest retention stats. -->
+  <script src="../js/progress.js"></script>
+  <script>
+    // Pull the FSRS API off the global the UMD bundle created.
+    var fsrs = FSRS.fsrs,
+        generatorParameters = FSRS.generatorParameters,
+        createEmptyCard = FSRS.createEmptyCard,
+        Rating = FSRS.Rating,
+        State = FSRS.State;
+
+    /* ---------------------------------------------------------------
+       FSRS engine — desired retention ~0.90, light fuzz so identical
+       cards don't all land on the same day.
+       --------------------------------------------------------------- */
+    const f = fsrs(generatorParameters({ enable_fuzz: true, request_retention: 0.90 }));
+
+    /* ---------------------------------------------------------------
+       Study items: each source card becomes TWO study items —
+         recognition  (front: German word + example  → back: English)
+         production   (front: English meaning         → back: German + example)
+       The FSRS scheduling key is `cardId + ":" + direction` so the two
+       directions are scheduled independently.
+       --------------------------------------------------------------- */
+    const DIRS = ["recognition", "production"];
+    const ITEMS = [];
+    (window.CARDS || []).forEach(function (c) {
+      DIRS.forEach(function (dir) {
+        ITEMS.push({ key: c.id + ":" + dir, card: c, dir: dir });
+      });
+    });
+
+    /* ---------------------------------------------------------------
+       Persistence. We store one FSRS state object per study key in a
+       single localStorage entry (de_fsrs). Dates are saved as ISO
+       strings and revived to Date objects on load.
+       --------------------------------------------------------------- */
+    const STORE_KEY = "fsrs";
+    function loadStates() {
+      const raw = DE.load(STORE_KEY, {});
+      const out = {};
+      Object.keys(raw).forEach(function (k) {
+        const s = raw[k];
+        out[k] = reviveCard(s);
+      });
+      return out;
+    }
+    function reviveCard(s) {
+      // Clone and turn ISO strings back into Date objects FSRS expects.
+      const c = Object.assign({}, s);
+      if (c.due) c.due = new Date(c.due);
+      if (c.last_review) c.last_review = new Date(c.last_review);
+      return c;
+    }
+    function saveStates(states) {
+      // localStorage JSON.stringify turns Dates into ISO strings automatically.
+      DE.store(STORE_KEY, states);
+    }
+
+    let STATES = loadStates();
+
+    /* ---------------------------------------------------------------
+       Filters & session state
+       --------------------------------------------------------------- */
+    let dirFilter = "both";      // both | recognition | production
+    let levelFilter = "all";     // all | A1 | A2 | B1
+    let themeFilter = "all";
+    let newLimit = 15;
+    let current = null;          // current study item
+    let preview = null;          // FSRS RecordLog for current item
+
+    function todayStr() { return new Date().toISOString().slice(0, 10); }
+
+    /* New cards introduced today (so we respect the daily new-card limit). */
+    function newToday() { return DE.load("fsrsNewDay_" + todayStr(), 0); }
+    function bumpNewToday() { DE.store("fsrsNewDay_" + todayStr(), newToday() + 1); }
+
+    function passesFilters(it) {
+      if (dirFilter !== "both" && it.dir !== dirFilter) return false;
+      if (levelFilter !== "all" && it.card.level !== levelFilter) return false;
+      if (themeFilter !== "all" && it.card.theme !== themeFilter) return false;
+      return true;
+    }
+
+    function isNew(it) { return !STATES[it.key]; }
+    function isDue(it) {
+      const s = STATES[it.key];
+      if (!s) return false;                // new cards handled separately
+      return s.due.getTime() <= Date.now();
+    }
+    function isLearned(it) {
+      const s = STATES[it.key];
+      return s && (s.state === State.Review) && s.scheduled_days >= 7;
+    }
+
+    /* ---------------------------------------------------------------
+       Build the queue: due review cards first, then new cards up to the
+       remaining daily new-card budget.
+       --------------------------------------------------------------- */
+    function buildQueue() {
+      const pool = ITEMS.filter(passesFilters);
+      const due = pool.filter(isDue);
+      // Sort due by how overdue (most overdue first).
+      due.sort(function (a, b) { return STATES[a.key].due - STATES[b.key].due; });
+
+      const budget = Math.max(0, newLimit - newToday());
+      const fresh = pool.filter(isNew).slice(0, budget);
+
+      // Interleave a little: reviews first, then new.
+      return due.concat(fresh);
+    }
+
+    function updateStats() {
+      const pool = ITEMS.filter(passesFilters);
+      let due = 0, learned = 0;
+      pool.forEach(function (it) {
+        if (isDue(it)) due++;
+        if (isLearned(it)) learned++;
+      });
+      const budget = Math.max(0, newLimit - newToday());
+      const newAvail = Math.min(budget, pool.filter(isNew).length);
+      document.getElementById("st-due").textContent = due;
+      document.getElementById("st-new").textContent = newAvail;
+      document.getElementById("st-learned").textContent = learned;
+      document.getElementById("st-today").textContent = DE.load("cardsToday", 0);
+    }
+
+    /* ---------------------------------------------------------------
+       Rendering
+       --------------------------------------------------------------- */
+    function stripHtml(html) {
+      const d = document.createElement("div");
+      d.innerHTML = html;
+      return d.textContent || "";
+    }
+
+    function fmtInterval(card) {
+      const ms = card.due.getTime() - Date.now();
+      const min = Math.round(ms / 60000);
+      if (min < 60) return "<" + Math.max(1, min) + " Min";
+      const hrs = Math.round(min / 60);
+      if (hrs < 24) return hrs + " Std";
+      const days = Math.round(hrs / 24);
+      if (days < 30) return days + " Tg";
+      const months = Math.round(days / 30);
+      if (months < 12) return months + " Mon";
+      return (days / 365).toFixed(1) + " J";
+    }
+
+    const cardEl = document.getElementById("card");
+    const flipRow = document.getElementById("flip-row");
+    const rateRow = document.getElementById("rate-row");
+    const emptyMsg = document.getElementById("empty-msg");
+
+    function showCard() {
+      const queue = buildQueue();
+      cardEl.classList.remove("flipped");
+      rateRow.style.display = "none";
+
+      if (!queue.length) {
+        current = null;
+        document.querySelector(".fc-stage").style.display = "none";
+        flipRow.style.display = "none";
+        emptyMsg.style.display = "block";
+        return;
+      }
+      document.querySelector(".fc-stage").style.display = "grid";
+      emptyMsg.style.display = "none";
+      flipRow.style.display = "flex";
+
+      current = queue[0];
+      const c = current.card;
+      const recog = current.dir === "recognition";
+
+      // FRONT
+      document.getElementById("front-badge").textContent = recog ? "DE → EN" : "EN → DE";
+      document.getElementById("front-word").textContent = recog ? c.de : c.en;
+      // Recognition shows the example as a context hint; production hides it (you produce it).
+      document.getElementById("front-ex").innerHTML = recog ? c.ex : "";
+
+      // BACK
+      document.getElementById("back-word").textContent = recog ? c.en : c.de;
+      document.getElementById("back-ex").innerHTML = c.ex;          // coloured example
+      document.getElementById("back-ex-en").textContent = c.exEn;
+      document.getElementById("back-tags").innerHTML =
+        '<span class="pill ' + (c.level === "A1" ? "lvl-a1" : c.level === "A2" ? "lvl-a2" : "") + '">' +
+        c.level + '</span> <span class="pill">' + c.theme + '</span>';
+    }
+
+    function flip() {
+      if (!current || cardEl.classList.contains("flipped")) return;
+      cardEl.classList.add("flipped");
+      flipRow.style.display = "none";
+      rateRow.style.display = "grid";
+
+      // Speak the German (target language) — from the example sentence.
+      DE.speak(stripHtml(current.card.ex));
+
+      // Compute FSRS preview for all four ratings and show next intervals.
+      const base = STATES[current.key] || createEmptyCard(new Date());
+      preview = f.repeat(reviveCard(base), new Date());
+      document.getElementById("ivl-1").textContent = fmtInterval(preview[Rating.Again].card);
+      document.getElementById("ivl-2").textContent = fmtInterval(preview[Rating.Hard].card);
+      document.getElementById("ivl-3").textContent = fmtInterval(preview[Rating.Good].card);
+      document.getElementById("ivl-4").textContent = fmtInterval(preview[Rating.Easy].card);
+    }
+
+    function rate(rating) {
+      if (!current || !preview) return;
+      const wasNew = isNew(current);
+      STATES[current.key] = preview[rating].card;   // already a fresh card object
+      saveStates(STATES);
+      if (wasNew) bumpNewToday();
+      // Log the review (remembered = anything but "Again") for honest retention stats.
+      if (window.PROG) window.PROG.logReview(rating !== Rating.Again, wasNew);
+      DE.store("cardsToday", DE.load("cardsToday", 0) + 1);
+      preview = null;
+      updateStats();
+      showCard();
+    }
+
+    /* ---------------------------------------------------------------
+       Wire up controls
+       --------------------------------------------------------------- */
+    cardEl.addEventListener("click", function () {
+      if (!cardEl.classList.contains("flipped")) flip();
+    });
+    document.getElementById("btn-flip").addEventListener("click", flip);
+    document.getElementById("r-again").addEventListener("click", function () { rate(Rating.Again); });
+    document.getElementById("r-hard").addEventListener("click", function () { rate(Rating.Hard); });
+    document.getElementById("r-good").addEventListener("click", function () { rate(Rating.Good); });
+    document.getElementById("r-easy").addEventListener("click", function () { rate(Rating.Easy); });
+
+    document.querySelectorAll(".chip[data-dir]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        dirFilter = b.dataset.dir;
+        document.querySelectorAll(".chip[data-dir]").forEach(function (x) { x.classList.remove("active"); });
+        b.classList.add("active");
+        updateStats(); showCard();
+      });
+    });
+    document.querySelectorAll(".chip[data-l]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        levelFilter = b.dataset.l;
+        document.querySelectorAll(".chip[data-l]").forEach(function (x) { x.classList.remove("active"); });
+        b.classList.add("active");
+        updateStats(); showCard();
+      });
+    });
+
+    // Build theme dropdown from the deck.
+    (function buildThemes() {
+      const sel = document.getElementById("themeSel");
+      const themes = Array.from(new Set((window.CARDS || []).map(function (c) { return c.theme; }))).sort();
+      sel.innerHTML = '<option value="all">Alle Themen</option>' +
+        themes.map(function (t) { return '<option value="' + t + '">' + t + '</option>'; }).join("");
+      sel.addEventListener("change", function () {
+        themeFilter = sel.value;
+        updateStats(); showCard();
+      });
+    })();
+
+    const newLimitInput = document.getElementById("newLimit");
+    newLimitInput.addEventListener("change", function () {
+      newLimit = Math.max(0, parseInt(newLimitInput.value, 10) || 0);
+      updateStats(); showCard();
+    });
+
+    /* ---------------------------------------------------------------
+       Keyboard shortcuts: space = flip, 1–4 = rate
+       --------------------------------------------------------------- */
+    document.addEventListener("keydown", function (e) {
+      if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+      if (e.key === " ") {
+        e.preventDefault();
+        if (!cardEl.classList.contains("flipped")) flip();
+      } else if (cardEl.classList.contains("flipped")) {
+        if (e.key === "1") rate(Rating.Again);
+        else if (e.key === "2") rate(Rating.Hard);
+        else if (e.key === "3") rate(Rating.Good);
+        else if (e.key === "4") rate(Rating.Easy);
+      }
+    });
+
+    /* ---------------------------------------------------------------
+       Export / Import / Reset
+       --------------------------------------------------------------- */
+    document.getElementById("btn-export").addEventListener("click", function () {
+      const payload = {
+        app: "deutsch-a2-fsrs",
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        fsrs: DE.load("fsrs", {}),
+        cardsToday: DE.load("cardsToday", 0),
+        newDay: DE.load("fsrsNewDay_" + todayStr(), 0)
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "deutsch-a2-fortschritt-" + todayStr() + ".json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById("btn-import").addEventListener("click", function () {
+      document.getElementById("import-file").click();
+    });
+    document.getElementById("import-file").addEventListener("change", function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function () {
+        try {
+          const data = JSON.parse(reader.result);
+          if (!data || data.app !== "deutsch-a2-fsrs" || !data.fsrs) {
+            alert("Diese Datei sieht nicht wie ein gültiges Backup aus.");
+            return;
+          }
+          if (!confirm("Backup einspielen? Der aktuelle Fortschritt auf diesem Gerät wird ersetzt.")) return;
+          DE.store("fsrs", data.fsrs);
+          if (typeof data.cardsToday === "number") DE.store("cardsToday", data.cardsToday);
+          STATES = loadStates();
+          updateStats();
+          showCard();
+          alert("Backup eingespielt. ✅");
+        } catch (err) {
+          alert("Konnte die Datei nicht lesen: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = "";   // allow re-importing the same file later
+    });
+
+    document.getElementById("btn-reset").addEventListener("click", function () {
+      if (!confirm("Den gesamten FSRS-Fortschritt wirklich löschen? (Export vorher empfohlen!)")) return;
+      DE.store("fsrs", {});
+      STATES = {};
+      updateStats();
+      showCard();
+    });
+
+    /* ---------------------------------------------------------------
+       Go!
+       --------------------------------------------------------------- */
+    updateStats();
+    showCard();
+  </script>
+</body>
+</html>

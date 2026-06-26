@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hören & Nachsprechen — Deutsch A2</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body data-page="listening">
+  <main class="container narrow">
+    <p class="eyebrow">Input ist der Treibstoff · passiv & aktiv hören</p>
+    <h1 class="page-title">🎧 Hören & Nachsprechen</h1>
+    <p class="page-sub">
+      Two hands-free audio modes. <strong>Listening Loop</strong>: lean back and let today's sentences
+      play on repeat — perfect for the commute or chores; lots of input builds your internal model of
+      German. <strong>Shadowing</strong>: the sentence plays, then <em>you say it out loud</em>,
+      copying the rhythm and melody — this is what turns listening into speaking. Adjust the speed to
+      your level.
+    </p>
+
+    <!-- Mode -->
+    <div class="controls">
+      <span class="muted" style="font-weight:700;">Modus:</span>
+      <button class="chip active" data-mode="loop">🔁 Listening Loop</button>
+      <button class="chip" data-mode="shadow">🗣️ Shadowing</button>
+    </div>
+
+    <!-- Source filters -->
+    <div class="controls">
+      <span class="muted" style="font-weight:700;">Quelle:</span>
+      <button class="chip active" data-src="due">Heute fällig</button>
+      <button class="chip" data-src="all">Alle Karten</button>
+      <select id="themeSel" class="chip" style="padding:0.35rem 0.6rem;"></select>
+      <select id="levelSel" class="chip" style="padding:0.35rem 0.6rem;">
+        <option value="all">Alle Niveaus</option>
+        <option value="A1">A1</option>
+        <option value="A2">A2</option>
+        <option value="B1">B1</option>
+      </select>
+    </div>
+
+    <!-- The card being heard -->
+    <div class="card listen-card" id="listen-card">
+      <div class="listen-progress" id="progress">—</div>
+      <div class="listen-de" id="ld-de">Bereit zum Hören</div>
+      <div class="listen-en" id="ld-en"></div>
+      <div class="listen-word" id="ld-word"></div>
+      <div class="shadow-prompt" id="shadow-prompt">🗣️ Jetzt du! Sprich laut nach — kopiere Rhythmus & Melodie.</div>
+    </div>
+
+    <!-- Transport controls -->
+    <div class="transport">
+      <button class="btn" id="btn-prev" title="Zurück">⏮</button>
+      <button class="btn primary lg play" id="btn-play">▶ Start</button>
+      <button class="btn" id="btn-next" title="Weiter">⏭</button>
+      <button class="btn" id="btn-replay" title="Wiederholen">🔁 Nochmal</button>
+    </div>
+
+    <!-- Audio settings -->
+    <div class="card">
+      <div class="slider-row">
+        <label for="rate">Tempo</label>
+        <input type="range" id="rate" min="0.5" max="1.2" step="0.05" value="0.9" />
+        <span class="val" id="rate-val">0.90×</span>
+      </div>
+      <div class="slider-row">
+        <label for="gap">Pause</label>
+        <input type="range" id="gap" min="0.5" max="6" step="0.5" value="2" />
+        <span class="val" id="gap-val">2.0 s</span>
+      </div>
+      <div class="slider-row" id="repeat-row">
+        <label for="repeatN">Wiederholungen</label>
+        <input type="range" id="repeatN" min="1" max="4" step="1" value="2" />
+        <span class="val" id="repeat-val">2×</span>
+      </div>
+    </div>
+
+    <p class="muted center" id="empty-msg" style="display:none; margin-top:1rem;">
+      Keine Karten in dieser Auswahl. Wechsle zu „Alle Karten" oder ändere den Filter.
+    </p>
+
+    <!-- Graceful degradation if the browser has no speech synthesis -->
+    <div class="callout warn" id="no-tts" style="display:none; margin-top:1rem;">
+      <div class="c-head">⚠️ Kein Sprachausgabe-Support</div>
+      Dein Browser unterstützt die Web Speech API (speechSynthesis) nicht. Probiere Chrome, Edge oder
+      Safari. Den Text kannst du trotzdem mitlesen.
+    </div>
+
+    <div class="callout" style="margin-top:1.5rem;">
+      <div class="c-head">Tipp</div>
+      <strong>Listening Loop</strong> plays each sentence a few times, then moves on and loops the whole
+      set — keep it running in the background. <strong>Shadowing</strong> plays once, waits while you
+      repeat aloud, plays once more as a check, then advances. Keep your screen awake so the audio
+      doesn't pause on mobile. „Heute fällig" uses the cards due in your
+      <a href="study.html">FSRS-Lernkarten</a>.
+    </div>
+  </main>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/data/cards.js"></script>
+  <script>
+    /* =========================================================================
+       Hören & Nachsprechen — Listening Loop + Shadowing.
+       Pure browser TTS (Web Speech API) via DE.speak(). No network needed.
+       ========================================================================= */
+    (function () {
+      "use strict";
+
+      // ---- State ----
+      var mode = "loop";          // "loop" | "shadow"
+      var source = "due";         // "due" | "all"
+      var themeFilter = "all";
+      var levelFilter = "all";
+      var queue = [];             // array of card objects
+      var idx = 0;
+      var playing = false;
+      var token = 0;              // bumped on every stop/seek to void stale callbacks
+      var timer = null;           // pending setTimeout id
+
+      // ---- Helpers ----
+      function stripHtml(html) {
+        var d = document.createElement("div");
+        d.innerHTML = html;
+        return d.textContent || "";
+      }
+      function reviveDue(s) { return s && s.due ? new Date(s.due).getTime() : 0; }
+
+      /* A card counts as "due" if EITHER study direction is new or due now. */
+      function dueCardIds() {
+        var states = DE.load("fsrs", {});
+        var now = Date.now();
+        var ids = {};
+        (window.CARDS || []).forEach(function (c) {
+          ["recognition", "production"].forEach(function (dir) {
+            var key = c.id + ":" + dir;
+            var s = states[key];
+            if (!s || reviveDue(s) <= now) ids[c.id] = true;
+          });
+        });
+        return ids;
+      }
+
+      function buildQueue() {
+        var due = source === "due" ? dueCardIds() : null;
+        return (window.CARDS || []).filter(function (c) {
+          if (themeFilter !== "all" && c.theme !== themeFilter) return false;
+          if (levelFilter !== "all" && c.level !== levelFilter) return false;
+          if (source === "due" && !due[c.id]) return false;
+          return true;
+        });
+      }
+
+      // ---- Settings (persisted) ----
+      var rate = DE.getRate();
+      var gapMs = DE.load("listenGap", 2) * 1000;
+      var repeatN = DE.load("listenRepeat", 2);
+
+      var els = {
+        card: document.getElementById("listen-card"),
+        progress: document.getElementById("progress"),
+        de: document.getElementById("ld-de"),
+        en: document.getElementById("ld-en"),
+        word: document.getElementById("ld-word"),
+        shadow: document.getElementById("shadow-prompt"),
+        play: document.getElementById("btn-play"),
+        empty: document.getElementById("empty-msg"),
+        repeatRow: document.getElementById("repeat-row")
+      };
+
+      // ---- Rendering ----
+      function render() {
+        if (!queue.length) {
+          els.empty.style.display = "block";
+          els.de.textContent = "—";
+          els.en.textContent = "";
+          els.word.textContent = "";
+          els.progress.textContent = "0 / 0";
+          return;
+        }
+        els.empty.style.display = "none";
+        var c = queue[idx];
+        els.de.innerHTML = c.ex;              // case-coloured German sentence
+        els.en.textContent = c.exEn;
+        els.word.textContent = c.de + " — " + c.en + "  ·  " + c.level + " · " + c.theme;
+        els.progress.textContent = (idx + 1) + " / " + queue.length;
+      }
+
+      // ---- Audio sequencing ----
+      function stop() {
+        playing = false;
+        token++;
+        if (timer) { clearTimeout(timer); timer = null; }
+        if (window.speechSynthesis) speechSynthesis.cancel();
+        els.card.classList.remove("speaking");
+        els.shadow.classList.remove("show");
+        els.play.textContent = "▶ Start";
+      }
+
+      function start() {
+        if (!queue.length) return;
+        playing = true;
+        token++;
+        els.play.textContent = "⏸ Pause";
+        playCurrent(token);
+      }
+
+      function toggle() { playing ? stop() : start(); }
+
+      /* Speak the current card's example, then chain the next step. */
+      function playCurrent(myToken) {
+        render();
+        var c = queue[idx];
+        var text = stripHtml(c.ex);
+        els.shadow.classList.remove("show");
+
+        if (mode === "shadow") {
+          // 1) play once
+          speakStep(text, myToken, function () {
+            // 2) your turn — pause to repeat aloud
+            els.shadow.classList.add("show");
+            wait(myToken, gapMs, function () {
+              els.shadow.classList.remove("show");
+              // 3) play once more as a model/check
+              speakStep(text, myToken, function () {
+                // 4) short gap, then advance
+                wait(myToken, gapMs, function () { advance(myToken); });
+              });
+            });
+          });
+        } else {
+          // Listening Loop: repeat the sentence repeatN times with a pause between
+          var count = 0;
+          (function loopOne() {
+            speakStep(text, myToken, function () {
+              count++;
+              if (count < repeatN) {
+                wait(myToken, gapMs, loopOne);
+              } else {
+                wait(myToken, gapMs, function () { advance(myToken); });
+              }
+            });
+          })();
+        }
+      }
+
+      function speakStep(text, myToken, onDone) {
+        els.card.classList.add("speaking");
+        DE.speak(text, {
+          rate: rate,
+          onend: function () {
+            els.card.classList.remove("speaking");
+            if (myToken !== token || !playing) return;
+            onDone();
+          }
+        });
+      }
+
+      function wait(myToken, ms, fn) {
+        timer = setTimeout(function () {
+          if (myToken !== token || !playing) return;
+          fn();
+        }, ms);
+      }
+
+      function advance(myToken) {
+        if (myToken !== token || !playing) return;
+        idx = (idx + 1) % queue.length;   // loop around endlessly
+        playCurrent(myToken);
+      }
+
+      // ---- Manual seek (prev/next/replay) ----
+      function seek(delta) {
+        if (!queue.length) return;
+        var wasPlaying = playing;
+        stop();
+        idx = (idx + delta + queue.length) % queue.length;
+        render();
+        if (wasPlaying) start();
+      }
+      function replay() {
+        if (!queue.length) return;
+        var wasPlaying = playing;
+        stop();
+        render();
+        if (wasPlaying) start(); else { playing = true; token++; els.play.textContent = "⏸ Pause"; playCurrent(token); }
+      }
+
+      // ---- Rebuild on filter change ----
+      function rebuild(keepPlaying) {
+        var wasPlaying = playing || keepPlaying;
+        stop();
+        queue = buildQueue();
+        idx = 0;
+        render();
+        if (wasPlaying && queue.length) start();
+      }
+
+      // ====================== Wire up ======================
+      // Graceful degradation
+      if (!DE.canSpeak()) {
+        document.getElementById("no-tts").style.display = "block";
+        els.play.disabled = true;
+      }
+
+      els.play.addEventListener("click", toggle);
+      document.getElementById("btn-next").addEventListener("click", function () { seek(1); });
+      document.getElementById("btn-prev").addEventListener("click", function () { seek(-1); });
+      document.getElementById("btn-replay").addEventListener("click", replay);
+
+      document.querySelectorAll(".chip[data-mode]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          mode = b.dataset.mode;
+          document.querySelectorAll(".chip[data-mode]").forEach(function (x) { x.classList.remove("active"); });
+          b.classList.add("active");
+          // repeat-count only relevant to loop mode
+          els.repeatRow.style.opacity = mode === "loop" ? "1" : "0.45";
+          rebuild(false);
+        });
+      });
+      document.querySelectorAll(".chip[data-src]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          source = b.dataset.src;
+          document.querySelectorAll(".chip[data-src]").forEach(function (x) { x.classList.remove("active"); });
+          b.classList.add("active");
+          rebuild(false);
+        });
+      });
+
+      // Theme dropdown built from the deck
+      (function () {
+        var sel = document.getElementById("themeSel");
+        var themes = Array.from(new Set((window.CARDS || []).map(function (c) { return c.theme; }))).sort();
+        sel.innerHTML = '<option value="all">Alle Themen</option>' +
+          themes.map(function (t) { return '<option value="' + t + '">' + t + '</option>'; }).join("");
+        sel.addEventListener("change", function () { themeFilter = sel.value; rebuild(false); });
+      })();
+      document.getElementById("levelSel").addEventListener("change", function () {
+        levelFilter = this.value; rebuild(false);
+      });
+
+      // Sliders
+      var rateEl = document.getElementById("rate"), rateVal = document.getElementById("rate-val");
+      rateEl.value = rate;
+      rateVal.textContent = rate.toFixed(2) + "×";
+      rateEl.addEventListener("input", function () {
+        rate = parseFloat(this.value);
+        rateVal.textContent = rate.toFixed(2) + "×";
+        DE.setRate(rate);   // shared with all 🔊 buttons site-wide
+      });
+
+      var gapEl = document.getElementById("gap"), gapVal = document.getElementById("gap-val");
+      gapEl.value = gapMs / 1000;
+      gapVal.textContent = (gapMs / 1000).toFixed(1) + " s";
+      gapEl.addEventListener("input", function () {
+        gapMs = parseFloat(this.value) * 1000;
+        gapVal.textContent = (gapMs / 1000).toFixed(1) + " s";
+        DE.store("listenGap", gapMs / 1000);
+      });
+
+      var repEl = document.getElementById("repeatN"), repVal = document.getElementById("repeat-val");
+      repEl.value = repeatN;
+      repVal.textContent = repeatN + "×";
+      repEl.addEventListener("input", function () {
+        repeatN = parseInt(this.value, 10);
+        repVal.textContent = repeatN + "×";
+        DE.store("listenRepeat", repeatN);
+      });
+
+      // Keyboard: space = play/pause, arrows = seek
+      document.addEventListener("keydown", function (e) {
+        if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+        if (e.key === " ") { e.preventDefault(); toggle(); }
+        else if (e.key === "ArrowRight") seek(1);
+        else if (e.key === "ArrowLeft") seek(-1);
+      });
+
+      // Stop audio when leaving the page
+      window.addEventListener("pagehide", stop);
+
+      // Go
+      queue = buildQueue();
+      render();
+    })();
+  </script>
+</body>
+</html>
