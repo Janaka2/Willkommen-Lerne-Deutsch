@@ -1,9 +1,12 @@
-/* Abstract speaking patterns ("Satzbausteine") for A2.
+/* Abstract speaking patterns ("Satzbausteine").
    Learn the frame, then swap in your own words.
-   ___ marks the slot you fill. */
+   ___ marks the slot you fill.
+   Each group carries a CEFR `level` ("A2" core, "B1" extension) so pages
+   can filter by level. */
 window.SENTENCE_GROUPS = [
   {
     title: "Sich vorstellen & Small Talk",
+    level: "A2",
     en: "Introducing yourself & small talk",
     items: [
       { de: "Ich heiße ___.", en: "My name is ___." },
@@ -18,6 +21,7 @@ window.SENTENCE_GROUPS = [
   },
   {
     title: "Wünsche & höfliche Bitten",
+    level: "A2",
     en: "Wishes & polite requests",
     items: [
       { de: "Ich möchte ___.", en: "I would like ___.", note: "polite 'want'" },
@@ -32,6 +36,7 @@ window.SENTENCE_GROUPS = [
   },
   {
     title: "Meinung sagen",
+    level: "A2",
     en: "Giving your opinion",
     items: [
       { de: "Ich denke, dass ___.", en: "I think that ___.", note: "verb to the END after 'dass'" },
@@ -46,6 +51,7 @@ window.SENTENCE_GROUPS = [
   },
   {
     title: "Pläne & Zukunft",
+    level: "A2",
     en: "Plans & future",
     items: [
       { de: "Ich will ___.", en: "I want to ___." },
@@ -59,6 +65,7 @@ window.SENTENCE_GROUPS = [
   },
   {
     title: "Mein Leben: früher, jetzt, später",
+    level: "A2",
     en: "My life: past, present, future (werden · wurde · wollte · würde)",
     items: [
       { de: "Mit ___ wollte ich ___ werden.", en: "At (age) ___ I wanted to become ___.", note: "wollte = wanted (past)" },
@@ -73,6 +80,7 @@ window.SENTENCE_GROUPS = [
   },
   {
     title: "Über die Vergangenheit sprechen",
+    level: "A2",
     en: "Talking about the past (Perfekt)",
     items: [
       { de: "Ich habe ___ gemacht.", en: "I did / made ___." },
@@ -86,6 +94,7 @@ window.SENTENCE_GROUPS = [
   },
   {
     title: "Vorlieben & Vergleiche",
+    level: "A2",
     en: "Preferences & comparisons",
     items: [
       { de: "Ich mag ___.", en: "I like ___." },
@@ -99,6 +108,7 @@ window.SENTENCE_GROUPS = [
   },
   {
     title: "Fragen stellen",
+    level: "A2",
     en: "Asking for information",
     items: [
       { de: "Wo ist ___?", en: "Where is ___?" },
@@ -114,6 +124,7 @@ window.SENTENCE_GROUPS = [
   },
   {
     title: "Probleme & Hilfe",
+    level: "A2",
     en: "Problems & getting help",
     items: [
       { de: "Ich verstehe das nicht.", en: "I don't understand that." },
@@ -127,6 +138,7 @@ window.SENTENCE_GROUPS = [
   },
   {
     title: "Verbinden: weil, dass, deshalb …",
+    level: "A2",
     en: "Connectors (cause, result, condition)",
     items: [
       { de: "___, weil ___ (Verb am Ende).", en: "___, because ___.", note: "'weil' sends verb to END" },
@@ -141,6 +153,7 @@ window.SENTENCE_GROUPS = [
   },
   {
     title: "Höflich & vorsichtig (Konjunktiv II)",
+    level: "A2",
     en: "Polite & tentative (would/could)",
     items: [
       { de: "Ich würde gern ___.", en: "I would like to ___." },
@@ -153,6 +166,7 @@ window.SENTENCE_GROUPS = [
   },
   {
     title: "Zeit & Häufigkeit",
+    level: "A2",
     en: "Time & frequency",
     items: [
       { de: "am Montag / am Wochenende", en: "on Monday / on the weekend", note: "days → 'am'" },
@@ -162,6 +176,63 @@ window.SENTENCE_GROUPS = [
       { de: "Ich lerne jeden Tag Deutsch.", en: "I study German every day." },
       { de: "Ich gehe oft / manchmal / nie ___.", en: "I often / sometimes / never ___." },
       { de: "zuerst … dann … danach … zum Schluss", en: "first … then … after that … finally" }
+    ]
+  },
+
+  /* ===================== B1 sentence frames ===================== */
+  {
+    title: "Vor- & Nachteile abwägen",
+    level: "B1",
+    en: "Weighing pros & cons (B1)",
+    items: [
+      { de: "Einerseits ___, andererseits ___.", en: "On one hand ___, on the other hand ___." },
+      { de: "Der Vorteil ist, dass ___.", en: "The advantage is that ___.", note: "dass → verb to the END" },
+      { de: "Der Nachteil ist, dass ___.", en: "The disadvantage is that ___." },
+      { de: "Es kommt darauf an, ob ___.", en: "It depends on whether ___." },
+      { de: "Im Vergleich zu ___ ist ___ besser.", en: "Compared to ___, ___ is better." },
+      { de: "Je mehr ___, desto ___.", en: "The more ___, the ___.", note: "je + comparative … desto + comparative" },
+      { de: "Insgesamt finde ich, dass ___.", en: "All in all I think that ___." }
+    ]
+  },
+  {
+    title: "Begründen & überzeugen",
+    level: "B1",
+    en: "Justifying & persuading (B1)",
+    items: [
+      { de: "Ich bin der Meinung, dass ___.", en: "I'm of the opinion that ___." },
+      { de: "Aus meiner Sicht ___.", en: "From my point of view ___." },
+      { de: "Das liegt daran, dass ___.", en: "That's because ___.", note: "daran + dass" },
+      { de: "Ein gutes Beispiel dafür ist ___.", en: "A good example of that is ___." },
+      { de: "Obwohl ___, ___.", en: "Although ___, ___.", note: "'obwohl' sends verb to the END" },
+      { de: "Trotzdem bin ich überzeugt, dass ___.", en: "Nevertheless I'm convinced that ___." },
+      { de: "Deshalb schlage ich vor, dass ___.", en: "Therefore I suggest that ___." }
+    ]
+  },
+  {
+    title: "Beschwerden & Probleme lösen",
+    level: "B1",
+    en: "Complaints & solving problems (B1)",
+    items: [
+      { de: "Ich möchte mich über ___ beschweren.", en: "I'd like to complain about ___.", note: "sich beschweren über + Akk" },
+      { de: "Leider funktioniert ___ nicht.", en: "Unfortunately ___ doesn't work." },
+      { de: "Könnten Sie sich bitte darum kümmern?", en: "Could you please take care of it?" },
+      { de: "Ich hätte erwartet, dass ___.", en: "I would have expected that ___." },
+      { de: "Wäre es möglich, ___ zu ___?", en: "Would it be possible to ___?", note: "Konjunktiv II + zu-Infinitiv" },
+      { de: "Ich schlage vor, dass wir ___.", en: "I suggest that we ___." },
+      { de: "Vielen Dank für Ihr Verständnis.", en: "Thank you for your understanding." }
+    ]
+  },
+  {
+    title: "Berichten: Passiv & Relativsätze",
+    level: "B1",
+    en: "Reporting: passive & relative clauses (B1)",
+    items: [
+      { de: "___ wird gerade ___.", en: "___ is currently being ___.", note: "Passiv: wird + Partizip" },
+      { de: "___ ist schon ___ worden.", en: "___ has already been ___.", note: "Passiv Perfekt: ist … worden" },
+      { de: "Das ist die Person, die ___.", en: "That's the person who ___.", note: "Relativpronomen (Nom.)" },
+      { de: "Das ist das Buch, das ich ___ habe.", en: "That's the book that I ___.", note: "Relativpronomen (Akk.)" },
+      { de: "Der Grund, warum ___, ist ___.", en: "The reason why ___ is ___." },
+      { de: "Es wird gesagt, dass ___.", en: "It is said that ___." }
     ]
   }
 ];

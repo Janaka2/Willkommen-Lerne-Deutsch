@@ -198,5 +198,68 @@ window.VERBS = [
   { inf: "aufpassen", en: "to pay attention / be careful", er: "passt auf", perf: "hat aufgepasst", tags: ["separable"] },
   { inf: "zuordnen", en: "to match / assign", er: "ordnet zu", perf: "hat zugeordnet", tags: ["separable"] },
   { inf: "ankreuzen", en: "to tick / mark with a cross", er: "kreuzt an", perf: "hat angekreuzt", tags: ["separable"] },
-  { inf: "empfehlen", en: "to recommend", er: "empfiehlt", perf: "hat empfohlen", tags: ["irregular", "+Dat"] }
+  { inf: "empfehlen", en: "to recommend", er: "empfiehlt", perf: "hat empfohlen", tags: ["irregular", "+Dat"] },
+
+  /* ================== B1 VERBS (tagged B1 in levels.js) ================== */
+  /* ----- Reflexive verbs (often + fixed preposition) ----- */
+  { inf: "sich beschweren", en: "to complain (über = about)", er: "beschwert sich", perf: "hat sich beschwert", tags: ["reflexive"] },
+  { inf: "sich entschuldigen", en: "to apologise (für = for)", er: "entschuldigt sich", perf: "hat sich entschuldigt", tags: ["reflexive"] },
+  { inf: "sich bedanken", en: "to thank (für = for)", er: "bedankt sich", perf: "hat sich bedankt", tags: ["reflexive"] },
+  { inf: "sich bewerben", en: "to apply (um = for a job)", er: "bewirbt sich", perf: "hat sich beworben", tags: ["reflexive", "irregular"] },
+  { inf: "sich erkundigen", en: "to enquire (nach = about)", er: "erkundigt sich", perf: "hat sich erkundigt", tags: ["reflexive"] },
+  { inf: "sich unterhalten", en: "to chat / converse (über = about)", er: "unterhält sich", perf: "hat sich unterhalten", tags: ["reflexive", "irregular"] },
+  { inf: "sich konzentrieren", en: "to concentrate (auf = on)", er: "konzentriert sich", perf: "hat sich konzentriert", tags: ["reflexive"] },
+  { inf: "sich erholen", en: "to recover / relax", er: "erholt sich", perf: "hat sich erholt", tags: ["reflexive"] },
+  { inf: "sich verlieben", en: "to fall in love (in = with)", er: "verliebt sich", perf: "hat sich verliebt", tags: ["reflexive"] },
+  { inf: "sich gewöhnen", en: "to get used to (an = to)", er: "gewöhnt sich", perf: "hat sich gewöhnt", tags: ["reflexive"] },
+  { inf: "sich kümmern", en: "to take care (um = of)", er: "kümmert sich", perf: "hat sich gekümmert", tags: ["reflexive"] },
+  { inf: "sich beeilen", en: "to hurry", er: "beeilt sich", perf: "hat sich beeilt", tags: ["reflexive"] },
+  { inf: "sich ärgern", en: "to be annoyed (über = about)", er: "ärgert sich", perf: "hat sich geärgert", tags: ["reflexive"] },
+  { inf: "sich vorstellen", en: "to imagine / introduce oneself", er: "stellt sich vor", perf: "hat sich vorgestellt", tags: ["reflexive", "separable"] },
+
+  /* ----- Communication & opinion ----- */
+  { inf: "diskutieren", en: "to discuss (über = about)", er: "diskutiert", perf: "hat diskutiert", tags: [] },
+  { inf: "behaupten", en: "to claim / assert", er: "behauptet", perf: "hat behauptet", tags: [] },
+  { inf: "beschreiben", en: "to describe", er: "beschreibt", perf: "hat beschrieben", tags: ["irregular"] },
+  { inf: "erwähnen", en: "to mention", er: "erwähnt", perf: "hat erwähnt", tags: [] },
+  { inf: "überzeugen", en: "to convince (von = of)", er: "überzeugt", perf: "hat überzeugt", tags: [] },
+  { inf: "mitteilen", en: "to inform / let know", er: "teilt mit", perf: "hat mitgeteilt", tags: ["separable", "+Dat"] },
+  { inf: "vorschlagen", en: "to suggest / propose", er: "schlägt vor", perf: "hat vorgeschlagen", tags: ["separable", "irregular"] },
+  { inf: "ausdrücken", en: "to express", er: "drückt aus", perf: "hat ausgedrückt", tags: ["separable"] },
+  { inf: "begründen", en: "to justify / give reasons", er: "begründet", perf: "hat begründet", tags: [] },
+  { inf: "bemerken", en: "to notice / remark", er: "bemerkt", perf: "hat bemerkt", tags: [] },
+
+  /* ----- Verbs with a fixed preposition ----- */
+  { inf: "teilnehmen", en: "to take part (an = in)", er: "nimmt teil", perf: "hat teilgenommen", tags: ["separable", "irregular"] },
+  { inf: "achten", en: "to pay attention (auf = to)", er: "achtet", perf: "hat geachtet", tags: [] },
+  { inf: "verzichten", en: "to do without (auf = on)", er: "verzichtet", perf: "hat verzichtet", tags: [] },
+  { inf: "sorgen", en: "to take care / provide (für = for)", er: "sorgt", perf: "hat gesorgt", tags: [] },
+  { inf: "abhängen", en: "to depend (von = on)", er: "hängt ab", perf: "hat abgehangen", tags: ["separable", "irregular"] },
+  { inf: "bestehen", en: "to pass / consist (aus = of) / insist (auf)", er: "besteht", perf: "hat bestanden", tags: ["irregular"] },
+  { inf: "nachdenken", en: "to think about (über)", er: "denkt nach", perf: "hat nachgedacht", tags: ["separable", "irregular"] },
+
+  /* ----- Abstract / inseparable prefixes ----- */
+  { inf: "erreichen", en: "to reach / achieve", er: "erreicht", perf: "hat erreicht", tags: [] },
+  { inf: "erlauben", en: "to allow", er: "erlaubt", perf: "hat erlaubt", tags: ["+Dat"] },
+  { inf: "verbieten", en: "to forbid", er: "verbietet", perf: "hat verboten", tags: ["irregular", "+Dat"] },
+  { inf: "verbringen", en: "to spend (time)", er: "verbringt", perf: "hat verbracht", tags: ["irregular"] },
+  { inf: "vermeiden", en: "to avoid", er: "vermeidet", perf: "hat vermieden", tags: ["irregular"] },
+  { inf: "verbessern", en: "to improve / correct", er: "verbessert", perf: "hat verbessert", tags: [] },
+  { inf: "verändern", en: "to change / alter", er: "verändert", perf: "hat verändert", tags: [] },
+  { inf: "entwickeln", en: "to develop", er: "entwickelt", perf: "hat entwickelt", tags: [] },
+  { inf: "entstehen", en: "to arise / come into being", er: "entsteht", perf: "ist entstanden", tags: ["irregular", "sein"] },
+  { inf: "erkennen", en: "to recognise", er: "erkennt", perf: "hat erkannt", tags: ["irregular"] },
+  { inf: "unterstützen", en: "to support", er: "unterstützt", perf: "hat unterstützt", tags: [] },
+  { inf: "unternehmen", en: "to undertake / do (an activity)", er: "unternimmt", perf: "hat unternommen", tags: ["irregular"] },
+  { inf: "übernehmen", en: "to take over / take on", er: "übernimmt", perf: "hat übernommen", tags: ["irregular"] },
+  { inf: "vergleichen", en: "to compare (mit = with)", er: "vergleicht", perf: "hat verglichen", tags: ["irregular"] },
+  { inf: "gelingen", en: "to succeed (es gelingt mir)", er: "gelingt", perf: "ist gelungen", tags: ["irregular", "sein", "+Dat"] },
+
+  /* ----- More separable verbs ----- */
+  { inf: "zunehmen", en: "to increase / gain weight", er: "nimmt zu", perf: "hat zugenommen", tags: ["separable", "irregular"] },
+  { inf: "abnehmen", en: "to decrease / lose weight", er: "nimmt ab", perf: "hat abgenommen", tags: ["separable", "irregular"] },
+  { inf: "stattfinden", en: "to take place", er: "findet statt", perf: "hat stattgefunden", tags: ["separable", "irregular"] },
+  { inf: "aufgeben", en: "to give up", er: "gibt auf", perf: "hat aufgegeben", tags: ["separable", "irregular"] },
+  { inf: "ausgeben", en: "to spend (money)", er: "gibt aus", perf: "hat ausgegeben", tags: ["separable", "irregular"] },
+  { inf: "zurückkehren", en: "to return", er: "kehrt zurück", perf: "ist zurückgekehrt", tags: ["separable", "sein"] }
 ];

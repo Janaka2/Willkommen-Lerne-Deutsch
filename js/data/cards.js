@@ -197,5 +197,128 @@ window.CARDS = [
   { id: "c1104", de: "wollte", en: "wanted to (past)", level: "A2", theme: "Zukunft",
     ex: 'Mit fünfzehn wollte <span class="c-nom">ich</span> Arzt werden.', exEn: "At fifteen I wanted to become a doctor." },
   { id: "c1105", de: "würde gern", en: "would like to", level: "B1", theme: "Zukunft",
-    ex: 'Eines Tages würde <span class="c-nom">ich</span> gern <span class="c-akk">eine eigene Firma</span> haben.', exEn: "One day I'd like to have my own company." }
+    ex: 'Eines Tages würde <span class="c-nom">ich</span> gern <span class="c-akk">eine eigene Firma</span> haben.', exEn: "One day I'd like to have my own company." },
+
+  /* ============================================================================
+     B1 CARDS (level: "B1") — work, society, environment, abstract, grammar B1.
+     Case-colour spans kept on the case-marking word, exactly like A1/A2 cards.
+     ========================================================================== */
+
+  /* ---------------------- Arbeit & Beruf ---------------------- */
+  { id: "c1200", de: "sich bewerben", en: "to apply (um = for)", level: "B1", theme: "Arbeit",
+    ex: '<span class="c-nom">Ich</span> bewerbe mich um <span class="c-akk">eine neue Stelle</span>.', exEn: "I'm applying for a new position." },
+  { id: "c1201", de: "die Bewerbung", en: "the application", level: "B1", theme: "Arbeit",
+    ex: '<span class="c-nom">Meine Bewerbung</span> hat <span class="c-akk">die Firma</span> überzeugt.', exEn: "My application convinced the company." },
+  { id: "c1202", de: "das Vorstellungsgespräch", en: "the job interview", level: "B1", theme: "Arbeit",
+    ex: 'Morgen habe <span class="c-nom">ich</span> <span class="c-akk">ein Vorstellungsgespräch</span>.', exEn: "Tomorrow I have a job interview." },
+  { id: "c1203", de: "das Gehalt", en: "the salary", level: "B1", theme: "Arbeit",
+    ex: '<span class="c-nom">Das Gehalt</span> hängt von <span class="c-dat">der Erfahrung</span> ab.', exEn: "The salary depends on experience." },
+  { id: "c1204", de: "kündigen", en: "to quit / give notice", level: "B1", theme: "Arbeit",
+    ex: '<span class="c-nom">Er</span> hat <span class="c-dat">seiner Firma</span> gekündigt.', exEn: "He gave his company notice." },
+  { id: "c1205", de: "die Verantwortung", en: "the responsibility", level: "B1", theme: "Arbeit",
+    ex: '<span class="c-nom">Sie</span> übernimmt <span class="c-akk">die Verantwortung</span> für <span class="c-akk">das Projekt</span>.', exEn: "She takes responsibility for the project." },
+  { id: "c1206", de: "der Erfolg", en: "the success", level: "B1", theme: "Arbeit",
+    ex: '<span class="c-nom">Der Erfolg</span> war <span class="c-gen">des Teams</span> Verdienst.', exEn: "The success was the team's achievement." },
+  { id: "c1207", de: "die Überstunde", en: "the overtime hour", level: "B1", theme: "Arbeit",
+    ex: '<span class="c-nom">Ich</span> mache diese Woche <span class="c-akk">viele Überstunden</span>.', exEn: "I'm doing a lot of overtime this week." },
+
+  /* ---------------------- Bildung ---------------------- */
+  { id: "c1210", de: "die Ausbildung", en: "the vocational training", level: "B1", theme: "Bildung",
+    ex: '<span class="c-nom">Meine Tochter</span> beginnt <span class="c-akk">eine Ausbildung</span> als Krankenschwester.', exEn: "My daughter is starting training as a nurse." },
+  { id: "c1211", de: "das Studium", en: "the (university) studies", level: "B1", theme: "Bildung",
+    ex: 'Während <span class="c-gen">des Studiums</span> hat <span class="c-nom">er</span> gejobbt.', exEn: "During his studies he had a side job." },
+  { id: "c1212", de: "der Fortschritt", en: "the progress", level: "B1", theme: "Bildung",
+    ex: '<span class="c-nom">Du</span> machst <span class="c-akk">große Fortschritte</span> in <span class="c-dat">Deutsch</span>.', exEn: "You're making great progress in German." },
+  { id: "c1213", de: "sich konzentrieren", en: "to concentrate (auf = on)", level: "B1", theme: "Bildung",
+    ex: '<span class="c-nom">Ich</span> kann mich nicht auf <span class="c-akk">die Arbeit</span> konzentrieren.', exEn: "I can't concentrate on the work." },
+  { id: "c1214", de: "das Wissen", en: "the knowledge", level: "B1", theme: "Bildung",
+    ex: '<span class="c-nom">Sein Wissen</span> über <span class="c-akk">Geschichte</span> ist beeindruckend.', exEn: "His knowledge of history is impressive." },
+
+  /* ---------------------- Umwelt & Natur ---------------------- */
+  { id: "c1220", de: "die Umwelt", en: "the environment", level: "B1", theme: "Umwelt",
+    ex: '<span class="c-nom">Wir</span> müssen <span class="c-akk">die Umwelt</span> schützen.', exEn: "We must protect the environment." },
+  { id: "c1221", de: "der Klimawandel", en: "the climate change", level: "B1", theme: "Umwelt",
+    ex: '<span class="c-nom">Der Klimawandel</span> betrifft <span class="c-akk">uns alle</span>.', exEn: "Climate change affects us all." },
+  { id: "c1222", de: "vermeiden", en: "to avoid", level: "B1", theme: "Umwelt",
+    ex: '<span class="c-nom">Man</span> sollte <span class="c-akk">unnötigen Müll</span> vermeiden.', exEn: "One should avoid unnecessary waste." },
+  { id: "c1223", de: "die Energie", en: "the energy", level: "B1", theme: "Umwelt",
+    ex: '<span class="c-nom">Wir</span> sparen <span class="c-akk">Energie</span> mit <span class="c-dat">neuen Geräten</span>.', exEn: "We save energy with new appliances." },
+  { id: "c1224", de: "der Müll", en: "the rubbish / waste", level: "B1", theme: "Umwelt",
+    ex: '<span class="c-nom">Ich</span> trenne <span class="c-akk">den Müll</span> zu Hause.', exEn: "I separate the waste at home." },
+
+  /* ---------------------- Gesundheit & Ernährung ---------------------- */
+  { id: "c1230", de: "die Ernährung", en: "the nutrition / diet", level: "B1", theme: "Gesundheit",
+    ex: '<span class="c-nom">Eine gesunde Ernährung</span> ist <span class="c-dat">mir</span> wichtig.', exEn: "A healthy diet is important to me." },
+  { id: "c1231", de: "sich erholen", en: "to recover / relax", level: "B1", theme: "Gesundheit",
+    ex: 'Im Urlaub habe <span class="c-nom">ich</span> mich gut erholt.', exEn: "On holiday I recovered well." },
+  { id: "c1232", de: "die Versicherung", en: "the insurance", level: "B1", theme: "Gesundheit",
+    ex: '<span class="c-nom">Die Versicherung</span> zahlt <span class="c-akk">die Behandlung</span>.', exEn: "The insurance pays for the treatment." },
+  { id: "c1233", de: "der Stress", en: "the stress", level: "B1", theme: "Gesundheit",
+    ex: '<span class="c-nom">Der Stress</span> bei <span class="c-dat">der Arbeit</span> macht <span class="c-akk">mich</span> krank.', exEn: "The stress at work makes me ill." },
+  { id: "c1234", de: "sich ärgern", en: "to get annoyed (über = about)", level: "B1", theme: "Gesundheit",
+    ex: '<span class="c-nom">Er</span> ärgert sich über <span class="c-akk">den Lärm</span>.', exEn: "He gets annoyed about the noise." },
+
+  /* ---------------------- Medien & Digitales ---------------------- */
+  { id: "c1240", de: "das Gerät", en: "the device", level: "B1", theme: "Medien",
+    ex: '<span class="c-nom">Dieses Gerät</span> verbraucht <span class="c-akk">wenig Strom</span>.', exEn: "This device uses little power." },
+  { id: "c1241", de: "der Datenschutz", en: "the data protection", level: "B1", theme: "Medien",
+    ex: '<span class="c-nom">Der Datenschutz</span> ist <span class="c-dat">vielen Menschen</span> wichtig.', exEn: "Data protection is important to many people." },
+  { id: "c1242", de: "die Werbung", en: "the advertising", level: "B1", theme: "Medien",
+    ex: '<span class="c-nom">Ich</span> finde <span class="c-akk">die Werbung</span> im Internet nervig.', exEn: "I find online advertising annoying." },
+  { id: "c1243", de: "das Passwort", en: "the password", level: "B1", theme: "Medien",
+    ex: '<span class="c-nom">Du</span> solltest <span class="c-akk">dein Passwort</span> regelmäßig ändern.', exEn: "You should change your password regularly." },
+
+  /* ---------------------- Gesellschaft & Politik ---------------------- */
+  { id: "c1250", de: "die Gesellschaft", en: "the society", level: "B1", theme: "Gesellschaft",
+    ex: 'In <span class="c-dat">unserer Gesellschaft</span> ändert sich <span class="c-nom">vieles</span>.', exEn: "In our society much is changing." },
+  { id: "c1251", de: "die Regierung", en: "the government", level: "B1", theme: "Gesellschaft",
+    ex: '<span class="c-nom">Die Regierung</span> hat <span class="c-akk">ein neues Gesetz</span> beschlossen.', exEn: "The government passed a new law." },
+  { id: "c1252", de: "die Wahl", en: "the election / choice", level: "B1", theme: "Gesellschaft",
+    ex: '<span class="c-nom">Die Bürger</span> gehen zur <span class="c-dat">Wahl</span>.', exEn: "The citizens go to vote." },
+  { id: "c1253", de: "die Steuer", en: "the tax", level: "B1", theme: "Gesellschaft",
+    ex: '<span class="c-nom">Jeder</span> muss <span class="c-akk">Steuern</span> zahlen.', exEn: "Everyone has to pay taxes." },
+
+  /* ---------------------- Gefühle & Persönlichkeit ---------------------- */
+  { id: "c1260", de: "sich freuen auf", en: "to look forward to (+ Akk)", level: "B1", theme: "Gefühle",
+    ex: '<span class="c-nom">Ich</span> freue mich auf <span class="c-akk">das Wochenende</span>.', exEn: "I'm looking forward to the weekend." },
+  { id: "c1261", de: "die Beziehung", en: "the relationship", level: "B1", theme: "Gefühle",
+    ex: '<span class="c-nom">Eine gute Beziehung</span> braucht <span class="c-akk">Vertrauen</span>.', exEn: "A good relationship needs trust." },
+  { id: "c1262", de: "die Geduld", en: "the patience", level: "B1", theme: "Gefühle",
+    ex: 'Mit <span class="c-dat">Kindern</span> braucht <span class="c-nom">man</span> <span class="c-akk">viel Geduld</span>.', exEn: "With children you need a lot of patience." },
+  { id: "c1263", de: "die Enttäuschung", en: "the disappointment", level: "B1", theme: "Gefühle",
+    ex: '<span class="c-nom">Die Niederlage</span> war <span class="c-dat">uns</span> eine große Enttäuschung.', exEn: "The defeat was a great disappointment to us." },
+
+  /* ---------------------- Abstrakt & Konnektoren B1 ---------------------- */
+  { id: "c1270", de: "der Vorteil", en: "the advantage", level: "B1", theme: "Abstrakt",
+    ex: '<span class="c-nom">Das hat</span> für <span class="c-akk">mich</span> <span class="c-akk">viele Vorteile</span>.', exEn: "That has many advantages for me." },
+  { id: "c1271", de: "der Nachteil", en: "the disadvantage", level: "B1", theme: "Abstrakt",
+    ex: '<span class="c-nom">Der größte Nachteil</span> ist <span class="c-nom">der Preis</span>.', exEn: "The biggest disadvantage is the price." },
+  { id: "c1272", de: "der Unterschied", en: "the difference", level: "B1", theme: "Abstrakt",
+    ex: '<span class="c-nom">Es</span> gibt <span class="c-akk">einen großen Unterschied</span> zwischen <span class="c-dat">beiden</span>.', exEn: "There's a big difference between the two." },
+  { id: "c1273", de: "die Zukunft", en: "the future", level: "B1", theme: "Abstrakt",
+    ex: 'In <span class="c-dat">der Zukunft</span> möchte <span class="c-nom">ich</span> im Ausland leben.', exEn: "In the future I'd like to live abroad." },
+  { id: "c1274", de: "einerseits … andererseits", en: "on one hand … on the other", level: "B1", theme: "Verbinden",
+    ex: 'Einerseits ist <span class="c-nom">es</span> teuer, andererseits ist <span class="c-nom">es</span> praktisch.', exEn: "On one hand it's expensive, on the other it's practical." },
+  { id: "c1275", de: "deswegen", en: "for that reason (verb 2nd)", level: "B1", theme: "Verbinden",
+    ex: '<span class="c-nom">Ich</span> war krank, deswegen blieb <span class="c-nom">ich</span> zu Hause.', exEn: "I was sick, that's why I stayed home." },
+  { id: "c1276", de: "je … desto", en: "the … the (more)", level: "B1", theme: "Verbinden",
+    ex: 'Je mehr <span class="c-nom">ich</span> übe, desto besser werde <span class="c-nom">ich</span>.', exEn: "The more I practise, the better I get." },
+
+  /* ---------------------- Grammatik B1 (Passiv, Relativ, Konjunktiv II) ---------------------- */
+  { id: "c1280", de: "Passiv (wird … + Partizip)", en: "passive: is being done", level: "B1", theme: "Grammatik",
+    ex: '<span class="c-nom">Das Haus</span> wird gerade renoviert.', exEn: "The house is being renovated right now." },
+  { id: "c1281", de: "Passiv Perfekt", en: "passive perfect: has been done", level: "B1", theme: "Grammatik",
+    ex: '<span class="c-nom">Der Brief</span> ist schon geschrieben worden.', exEn: "The letter has already been written." },
+  { id: "c1282", de: "Relativsatz (der/die/das)", en: "relative clause", level: "B1", theme: "Grammatik",
+    ex: '<span class="c-nom">Das ist der Mann</span>, <span class="c-nom">der</span> nebenan wohnt.', exEn: "That's the man who lives next door." },
+  { id: "c1283", de: "Relativsatz (Dativ: dem)", en: "relative clause in Dativ", level: "B1", theme: "Grammatik",
+    ex: '<span class="c-nom">Die Frau</span>, <span class="c-dat">der</span> ich helfe, ist <span class="c-nom">meine Nachbarin</span>.', exEn: "The woman I'm helping is my neighbour." },
+  { id: "c1284", de: "würde + Infinitiv", en: "would (Konjunktiv II)", level: "B1", theme: "Grammatik",
+    ex: 'An <span class="c-dat">deiner Stelle</span> würde <span class="c-nom">ich</span> <span class="c-akk">den Arzt</span> fragen.', exEn: "In your place I would ask the doctor." },
+  { id: "c1285", de: "hätte / wäre", en: "would have / would be", level: "B1", theme: "Grammatik",
+    ex: 'Wenn <span class="c-nom">ich</span> Zeit hätte, käme <span class="c-nom">ich</span> mit.', exEn: "If I had time, I'd come along." },
+  { id: "c1286", de: "um … zu", en: "in order to", level: "B1", theme: "Grammatik",
+    ex: '<span class="c-nom">Ich</span> lerne Deutsch, um <span class="c-akk">eine Arbeit</span> zu finden.', exEn: "I learn German in order to find a job." },
+  { id: "c1287", de: "damit", en: "so that (new subject)", level: "B1", theme: "Grammatik",
+    ex: '<span class="c-nom">Ich</span> spreche langsam, damit <span class="c-nom">du</span> mich verstehst.', exEn: "I speak slowly so that you understand me." }
 ];

@@ -311,5 +311,106 @@ window.NOUNS = [
   { de: "Anschluss", art: "der", pl: "Anschlüsse", en: "connection / socket", cat: "Technology & Media" },
   { de: "Kabel", art: "das", pl: "Kabel", en: "cable", cat: "Technology & Media" },
   { de: "USB-Stick", art: "der", pl: "USB-Sticks", en: "USB stick", cat: "Technology & Media" },
-  { de: "Papierkorb", art: "der", pl: "Papierkörbe", en: "recycle bin / wastepaper basket", cat: "Technology & Media" }
+  { de: "Papierkorb", art: "der", pl: "Papierkörbe", en: "recycle bin / wastepaper basket", cat: "Technology & Media" },
+
+  /* ================== B1 NOUNS (tagged B1 in levels.js) ================== */
+  /* ----- Arbeit & Beruf ----- */
+  { de: "Arbeitgeber", art: "der", pl: "Arbeitgeber", en: "employer", cat: "Arbeit & Beruf" },
+  { de: "Arbeitnehmer", art: "der", pl: "Arbeitnehmer", en: "employee", cat: "Arbeit & Beruf" },
+  { de: "Gehalt", art: "das", pl: "Gehälter", en: "salary", cat: "Arbeit & Beruf" },
+  { de: "Stelle", art: "die", pl: "Stellen", en: "job / position", cat: "Arbeit & Beruf" },
+  { de: "Vorstellungsgespräch", art: "das", pl: "Vorstellungsgespräche", en: "job interview", cat: "Arbeit & Beruf" },
+  { de: "Abteilung", art: "die", pl: "Abteilungen", en: "department", cat: "Arbeit & Beruf" },
+  { de: "Erfolg", art: "der", pl: "Erfolge", en: "success", cat: "Arbeit & Beruf" },
+  { de: "Verantwortung", art: "die", pl: "Verantwortungen", en: "responsibility", cat: "Arbeit & Beruf" },
+  { de: "Überstunde", art: "die", pl: "Überstunden", en: "hour of overtime", cat: "Arbeit & Beruf" },
+  { de: "Praktikum", art: "das", pl: "Praktika", en: "internship", cat: "Arbeit & Beruf" },
+  { de: "Karriere", art: "die", pl: "Karrieren", en: "career", cat: "Arbeit & Beruf" },
+  { de: "Kündigung", art: "die", pl: "Kündigungen", en: "termination / notice (to quit)", cat: "Arbeit & Beruf" },
+  { de: "Gewerkschaft", art: "die", pl: "Gewerkschaften", en: "trade union", cat: "Arbeit & Beruf" },
+
+  /* ----- Bildung ----- */
+  { de: "Bildung", art: "die", pl: "—", en: "education", cat: "Bildung" },
+  { de: "Ausbildung", art: "die", pl: "Ausbildungen", en: "vocational training", cat: "Bildung" },
+  { de: "Studium", art: "das", pl: "Studien", en: "(university) studies", cat: "Bildung" },
+  { de: "Universität", art: "die", pl: "Universitäten", en: "university", cat: "Bildung" },
+  { de: "Wissen", art: "das", pl: "—", en: "knowledge", cat: "Bildung" },
+  { de: "Kenntnis", art: "die", pl: "Kenntnisse", en: "knowledge / skill", cat: "Bildung" },
+  { de: "Fortschritt", art: "der", pl: "Fortschritte", en: "progress", cat: "Bildung" },
+  { de: "Zeugnis", art: "das", pl: "Zeugnisse", en: "certificate / report card", cat: "Bildung" },
+  { de: "Vorlesung", art: "die", pl: "Vorlesungen", en: "lecture", cat: "Bildung" },
+  { de: "Forschung", art: "die", pl: "Forschungen", en: "research", cat: "Bildung" },
+
+  /* ----- Umwelt & Natur ----- */
+  { de: "Umwelt", art: "die", pl: "—", en: "environment", cat: "Umwelt & Natur" },
+  { de: "Umweltschutz", art: "der", pl: "—", en: "environmental protection", cat: "Umwelt & Natur" },
+  { de: "Klimawandel", art: "der", pl: "—", en: "climate change", cat: "Umwelt & Natur" },
+  { de: "Natur", art: "die", pl: "—", en: "nature", cat: "Umwelt & Natur" },
+  { de: "Energie", art: "die", pl: "Energien", en: "energy", cat: "Umwelt & Natur" },
+  { de: "Müll", art: "der", pl: "—", en: "rubbish / trash", cat: "Umwelt & Natur" },
+  { de: "Verschmutzung", art: "die", pl: "—", en: "pollution", cat: "Umwelt & Natur" },
+  { de: "Recycling", art: "das", pl: "—", en: "recycling", cat: "Umwelt & Natur" },
+
+  /* ----- Gesundheit & Ernährung ----- */
+  { de: "Ernährung", art: "die", pl: "—", en: "nutrition / diet", cat: "Gesundheit & Ernährung" },
+  { de: "Behandlung", art: "die", pl: "Behandlungen", en: "(medical) treatment", cat: "Gesundheit & Ernährung" },
+  { de: "Krankenkasse", art: "die", pl: "Krankenkassen", en: "health insurance (company)", cat: "Gesundheit & Ernährung" },
+  { de: "Versicherung", art: "die", pl: "Versicherungen", en: "insurance", cat: "Gesundheit & Ernährung" },
+  { de: "Stress", art: "der", pl: "—", en: "stress", cat: "Gesundheit & Ernährung" },
+  { de: "Bewegung", art: "die", pl: "Bewegungen", en: "movement / exercise", cat: "Gesundheit & Ernährung" },
+  { de: "Verletzung", art: "die", pl: "Verletzungen", en: "injury", cat: "Gesundheit & Ernährung" },
+  { de: "Operation", art: "die", pl: "Operationen", en: "operation / surgery", cat: "Gesundheit & Ernährung" },
+
+  /* ----- Medien & Digitales ----- */
+  { de: "Medium", art: "das", pl: "Medien", en: "medium (pl: media)", cat: "Medien & Digitales" },
+  { de: "Werbung", art: "die", pl: "—", en: "advertising / advert", cat: "Medien & Digitales" },
+  { de: "Datenschutz", art: "der", pl: "—", en: "data protection / privacy", cat: "Medien & Digitales" },
+  { de: "Bildschirm", art: "der", pl: "Bildschirme", en: "screen / monitor", cat: "Medien & Digitales" },
+  { de: "Anwendung", art: "die", pl: "Anwendungen", en: "application / app", cat: "Medien & Digitales" },
+  { de: "Gerät", art: "das", pl: "Geräte", en: "device / appliance", cat: "Medien & Digitales" },
+  { de: "Sendung", art: "die", pl: "Sendungen", en: "(TV/radio) programme", cat: "Medien & Digitales" },
+  { de: "Suchmaschine", art: "die", pl: "Suchmaschinen", en: "search engine", cat: "Medien & Digitales" },
+  { de: "Benutzer", art: "der", pl: "Benutzer", en: "user", cat: "Medien & Digitales" },
+  { de: "Passwort", art: "das", pl: "Passwörter", en: "password", cat: "Medien & Digitales" },
+
+  /* ----- Gesellschaft & Politik (leicht) ----- */
+  { de: "Gesellschaft", art: "die", pl: "Gesellschaften", en: "society", cat: "Gesellschaft & Politik" },
+  { de: "Regierung", art: "die", pl: "Regierungen", en: "government", cat: "Gesellschaft & Politik" },
+  { de: "Politik", art: "die", pl: "—", en: "politics", cat: "Gesellschaft & Politik" },
+  { de: "Gesetz", art: "das", pl: "Gesetze", en: "law", cat: "Gesellschaft & Politik" },
+  { de: "Wahl", art: "die", pl: "Wahlen", en: "election / choice", cat: "Gesellschaft & Politik" },
+  { de: "Bürger", art: "der", pl: "Bürger", en: "citizen", cat: "Gesellschaft & Politik" },
+  { de: "Steuer", art: "die", pl: "Steuern", en: "tax", cat: "Gesellschaft & Politik" },
+  { de: "Demokratie", art: "die", pl: "Demokratien", en: "democracy", cat: "Gesellschaft & Politik" },
+  { de: "Gleichberechtigung", art: "die", pl: "—", en: "equal rights / equality", cat: "Gesellschaft & Politik" },
+  { de: "Flüchtling", art: "der", pl: "Flüchtlinge", en: "refugee", cat: "Gesellschaft & Politik" },
+
+  /* ----- Gefühle & Persönlichkeit ----- */
+  { de: "Gefühl", art: "das", pl: "Gefühle", en: "feeling", cat: "Gefühle & Persönlichkeit" },
+  { de: "Geduld", art: "die", pl: "—", en: "patience", cat: "Gefühle & Persönlichkeit" },
+  { de: "Charakter", art: "der", pl: "Charaktere", en: "character", cat: "Gefühle & Persönlichkeit" },
+  { de: "Eigenschaft", art: "die", pl: "Eigenschaften", en: "quality / trait", cat: "Gefühle & Persönlichkeit" },
+  { de: "Verhalten", art: "das", pl: "—", en: "behaviour", cat: "Gefühle & Persönlichkeit" },
+  { de: "Beziehung", art: "die", pl: "Beziehungen", en: "relationship", cat: "Gefühle & Persönlichkeit" },
+  { de: "Vertrauen", art: "das", pl: "—", en: "trust", cat: "Gefühle & Persönlichkeit" },
+  { de: "Enttäuschung", art: "die", pl: "Enttäuschungen", en: "disappointment", cat: "Gefühle & Persönlichkeit" },
+  { de: "Stimmung", art: "die", pl: "Stimmungen", en: "mood / atmosphere", cat: "Gefühle & Persönlichkeit" },
+  { de: "Selbstbewusstsein", art: "das", pl: "—", en: "self-confidence", cat: "Gefühle & Persönlichkeit" },
+
+  /* ----- Abstrakt & nützlich (B1) ----- */
+  { de: "Zukunft", art: "die", pl: "—", en: "future", cat: "Abstract & Useful" },
+  { de: "Entwicklung", art: "die", pl: "Entwicklungen", en: "development", cat: "Abstract & Useful" },
+  { de: "Veränderung", art: "die", pl: "Veränderungen", en: "change", cat: "Abstract & Useful" },
+  { de: "Unterschied", art: "der", pl: "Unterschiede", en: "difference", cat: "Abstract & Useful" },
+  { de: "Vorteil", art: "der", pl: "Vorteile", en: "advantage", cat: "Abstract & Useful" },
+  { de: "Nachteil", art: "der", pl: "Nachteile", en: "disadvantage", cat: "Abstract & Useful" },
+  { de: "Bedeutung", art: "die", pl: "Bedeutungen", en: "meaning / importance", cat: "Abstract & Useful" },
+  { de: "Zusammenhang", art: "der", pl: "Zusammenhänge", en: "connection / context", cat: "Abstract & Useful" },
+  { de: "Voraussetzung", art: "die", pl: "Voraussetzungen", en: "precondition / requirement", cat: "Abstract & Useful" },
+  { de: "Folge", art: "die", pl: "Folgen", en: "consequence", cat: "Abstract & Useful" },
+  { de: "Ziel", art: "das", pl: "Ziele", en: "goal / aim", cat: "Abstract & Useful" },
+  { de: "Vorschlag", art: "der", pl: "Vorschläge", en: "suggestion / proposal", cat: "Abstract & Useful" },
+  { de: "Beschwerde", art: "die", pl: "Beschwerden", en: "complaint", cat: "Abstract & Useful" },
+  { de: "Verspätung", art: "die", pl: "Verspätungen", en: "delay", cat: "Abstract & Useful" },
+  { de: "Wirkung", art: "die", pl: "Wirkungen", en: "effect", cat: "Abstract & Useful" }
 ];

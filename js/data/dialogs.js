@@ -1,9 +1,11 @@
 /* Practice dialogues ("Dialoge") for speaking with a partner.
-   Each dialog: { title, en, lines:[{who:"A"|"B", de, en}] }
-   Themes mix real A1/A2 situations + topics from class (Linie 1). */
+   Each dialog: { title, level, en, lines:[{who:"A"|"B", de, en}] }
+   Themes mix real A1/A2 situations + topics from class (Linie 1).
+   `level` ("A2" core, "B1" extension) lets the page filter by CEFR level. */
 window.DIALOGS = [
   {
     title: "Im Handygeschäft — Reparatur",
+    level: "A2",
     en: "At the phone shop — repair",
     lines: [
       { who: "A", de: "Guten Tag, mein Handy ist kaputt. Das Display ist gebrochen.", en: "Hello, my phone is broken. The display is cracked." },
@@ -17,6 +19,7 @@ window.DIALOGS = [
   },
   {
     title: "Computer-Problem — Elektrobastler",
+    level: "A2",
     en: "Computer problem — the tinkerers",
     lines: [
       { who: "A", de: "Mein Drucker funktioniert nicht. Was soll ich machen?", en: "My printer isn't working. What should I do?" },
@@ -29,6 +32,7 @@ window.DIALOGS = [
   },
   {
     title: "Neue Leute kennenlernen",
+    level: "A2",
     en: "Getting to know new people",
     lines: [
       { who: "A", de: "Hallo, ich glaube, wir kennen uns noch nicht. Ich heiße Janaka.", en: "Hi, I think we haven't met yet. My name is Janaka." },
@@ -42,6 +46,7 @@ window.DIALOGS = [
   },
   {
     title: "Beim Arzt — einen Termin machen",
+    level: "A2",
     en: "At the doctor — making an appointment",
     lines: [
       { who: "A", de: "Praxis Dr. Weber, guten Morgen.", en: "Dr. Weber's practice, good morning." },
@@ -54,6 +59,7 @@ window.DIALOGS = [
   },
   {
     title: "Einkaufen im Supermarkt",
+    level: "A2",
     en: "Shopping at the supermarket",
     lines: [
       { who: "A", de: "Entschuldigung, wo finde ich die Milch?", en: "Excuse me, where do I find the milk?" },
@@ -66,6 +72,7 @@ window.DIALOGS = [
   },
   {
     title: "Im Restaurant bestellen",
+    level: "A2",
     en: "Ordering in a restaurant",
     lines: [
       { who: "A", de: "Guten Abend. Möchten Sie schon bestellen?", en: "Good evening. Would you like to order already?" },
@@ -78,6 +85,7 @@ window.DIALOGS = [
   },
   {
     title: "Nach dem Weg fragen",
+    level: "A2",
     en: "Asking for directions",
     lines: [
       { who: "A", de: "Entschuldigung, wie komme ich zum Bahnhof?", en: "Excuse me, how do I get to the train station?" },
@@ -90,6 +98,7 @@ window.DIALOGS = [
   },
   {
     title: "Über Pläne sprechen (Zukunft)",
+    level: "A2",
     en: "Talking about plans (future)",
     lines: [
       { who: "A", de: "Was machst du nächstes Jahr?", en: "What are you doing next year?" },
@@ -103,6 +112,7 @@ window.DIALOGS = [
   },
   {
     title: "Small Talk über das Wochenende",
+    level: "A2",
     en: "Small talk about the weekend",
     lines: [
       { who: "A", de: "Wie war dein Wochenende?", en: "How was your weekend?" },
@@ -111,6 +121,63 @@ window.DIALOGS = [
       { who: "B", de: "Fleißig! Hast du auch Pause gemacht?", en: "Diligent! Did you take a break too?" },
       { who: "A", de: "Klar. Am Sonntag bin ich spazieren gegangen.", en: "Of course. On Sunday I went for a walk." },
       { who: "B", de: "Das klingt gut. Nächstes Wochenende sollten wir uns treffen.", en: "That sounds good. Next weekend we should meet up." }
+    ]
+  },
+
+  /* ===================== B1 dialogues ===================== */
+  {
+    title: "Vorstellungsgespräch",
+    level: "B1",
+    en: "Job interview (B1)",
+    lines: [
+      { who: "A", de: "Schön, dass Sie da sind. Erzählen Sie doch kurz etwas über sich.", en: "Nice to have you here. Could you tell us a bit about yourself?" },
+      { who: "B", de: "Gern. Ich bin seit zehn Jahren Softwareentwickler und habe viel Erfahrung mit großen Projekten.", en: "Gladly. I've been a software developer for ten years and have a lot of experience with large projects." },
+      { who: "A", de: "Warum haben Sie sich bei uns beworben?", en: "Why did you apply to us?" },
+      { who: "B", de: "Ihre Firma ist bekannt für moderne Technik. Ich möchte mich weiterentwickeln und Verantwortung übernehmen.", en: "Your company is known for modern technology. I'd like to develop further and take on responsibility." },
+      { who: "A", de: "Was sind Ihre Stärken und Schwächen?", en: "What are your strengths and weaknesses?" },
+      { who: "B", de: "Ich bin sehr zuverlässig. Manchmal bin ich aber zu genau, deshalb arbeite ich daran.", en: "I'm very reliable. Sometimes, though, I'm too meticulous, so I'm working on that." },
+      { who: "A", de: "Vielen Dank. Wir melden uns nächste Woche bei Ihnen.", en: "Thank you. We'll get back to you next week." }
+    ]
+  },
+  {
+    title: "Eine Beschwerde im Geschäft",
+    level: "B1",
+    en: "A complaint in a shop (B1)",
+    lines: [
+      { who: "A", de: "Guten Tag, ich möchte mich über dieses Gerät beschweren. Es funktioniert seit gestern nicht mehr.", en: "Hello, I'd like to complain about this device. It hasn't worked since yesterday." },
+      { who: "B", de: "Das tut mir leid. Haben Sie noch den Kassenbon?", en: "I'm sorry about that. Do you still have the receipt?" },
+      { who: "A", de: "Ja, hier ist er. Ich habe es erst letzte Woche gekauft.", en: "Yes, here it is. I only bought it last week." },
+      { who: "B", de: "Dann haben Sie natürlich Garantie. Möchten Sie Ihr Geld zurück oder ein neues Gerät?", en: "Then of course you have a warranty. Would you like your money back or a new device?" },
+      { who: "A", de: "Am liebsten ein neues. Wäre es möglich, es gleich umzutauschen?", en: "A new one preferably. Would it be possible to exchange it right away?" },
+      { who: "B", de: "Kein Problem. Ich kümmere mich sofort darum.", en: "No problem. I'll take care of it immediately." },
+      { who: "A", de: "Vielen Dank für Ihr Verständnis.", en: "Thank you for your understanding." }
+    ]
+  },
+  {
+    title: "Diskussion: Stadt oder Land?",
+    level: "B1",
+    en: "Discussion: city or countryside? (B1)",
+    lines: [
+      { who: "A", de: "Ich finde, das Leben in der Stadt hat viele Vorteile. Man hat alles in der Nähe.", en: "I think city life has many advantages. You have everything nearby." },
+      { who: "B", de: "Das stimmt, aber der Nachteil ist, dass alles teurer und lauter ist.", en: "That's true, but the disadvantage is that everything is more expensive and noisier." },
+      { who: "A", de: "Einerseits ja, andererseits gibt es auf dem Land kaum gute Jobs.", en: "On one hand yes, on the other hand there are hardly any good jobs in the countryside." },
+      { who: "B", de: "Da hast du recht. Trotzdem würde ich lieber im Grünen wohnen, weil die Luft besser ist.", en: "You're right there. Still, I'd rather live in the countryside because the air is better." },
+      { who: "A", de: "Je älter ich werde, desto mehr verstehe ich das.", en: "The older I get, the more I understand that." },
+      { who: "B", de: "Vielleicht ist ein kleiner Ort in der Nähe der Stadt der beste Kompromiss.", en: "Maybe a small town near the city is the best compromise." }
+    ]
+  },
+  {
+    title: "Bei der Wohnungsbesichtigung",
+    level: "B1",
+    en: "At the apartment viewing (B1)",
+    lines: [
+      { who: "A", de: "Guten Tag, ich interessiere mich für die Wohnung, die Sie inseriert haben.", en: "Hello, I'm interested in the apartment that you advertised." },
+      { who: "B", de: "Schön. Die Wohnung wird gerade renoviert, aber sie ist ab nächstem Monat frei.", en: "Great. The apartment is currently being renovated, but it's available from next month." },
+      { who: "A", de: "Wie hoch ist die Miete und sind die Nebenkosten schon enthalten?", en: "How high is the rent, and are the utilities already included?" },
+      { who: "B", de: "Die Miete beträgt 1200 Franken. Die Nebenkosten kommen noch dazu.", en: "The rent is 1200 francs. The utilities are extra." },
+      { who: "A", de: "Wäre es möglich, einen Haustier zu halten? Ich habe eine Katze.", en: "Would it be possible to keep a pet? I have a cat." },
+      { who: "B", de: "Das müsste ich mit dem Eigentümer besprechen. Ich melde mich, sobald ich Bescheid weiß.", en: "I'd have to discuss that with the owner. I'll get back to you as soon as I know." },
+      { who: "A", de: "Vielen Dank. Ich würde mich sehr über eine Zusage freuen.", en: "Thank you. I'd be very happy about an acceptance." }
     ]
   }
 ];
