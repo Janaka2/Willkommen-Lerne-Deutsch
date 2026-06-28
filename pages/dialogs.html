@@ -26,6 +26,11 @@
       <span style="flex:1"></span>
       <button class="chip" id="practiceBtn" aria-pressed="false">👁️ Übungsmodus: aus</button>
     </div>
+    <div class="controls" id="levelChips" style="margin-top:-0.6rem;">
+      <button class="chip active" data-dl="all">Alle</button>
+      <button class="chip" data-dl="A2"><span class="pill lvl-a2">A2</span></button>
+      <button class="chip" data-dl="B1"><span class="pill lvl-b1">B1</span></button>
+    </div>
 
     <div id="dialogs"></div>
   </main>
@@ -36,7 +41,9 @@
     var wrap = document.getElementById("dialogs");
     var search = document.getElementById("search");
     var practiceBtn = document.getElementById("practiceBtn");
+    var levelChips = document.getElementById("levelChips");
     var practice = false;
+    var levelFilter = "all";
 
     function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"); }
 
@@ -44,6 +51,8 @@
       var q = search.value.trim().toLowerCase();
       wrap.innerHTML = "";
       DIALOGS.forEach(function (d) {
+        var dl = d.level || "A2";
+        if (levelFilter !== "all" && dl !== levelFilter) return;
         var hay = (d.title + " " + d.en + " " +
           d.lines.map(function (l) { return l.de + " " + l.en; }).join(" ")).toLowerCase();
         if (q && hay.indexOf(q) === -1) return;
@@ -52,7 +61,8 @@
         card.className = "card";
         card.style.marginBottom = "1.3rem";
 
-        var head = '<h2 style="margin-top:0;">' + esc(d.title) + '</h2>' +
+        var badge = '<span class="pill ' + (dl === "B1" ? "lvl-b1" : "lvl-a2") + '">' + dl + '</span> ';
+        var head = '<h2 style="margin-top:0;">' + badge + esc(d.title) + '</h2>' +
                    '<p class="muted" style="margin-top:-0.4rem;">' + esc(d.en) + '</p>';
 
         var dialog = document.createElement("div");
@@ -86,6 +96,14 @@
       render();
     });
     search.addEventListener("input", render);
+    levelChips.addEventListener("click", function (e) {
+      var btn = e.target.closest(".chip");
+      if (!btn) return;
+      levelChips.querySelectorAll(".chip").forEach(function (c) { c.classList.remove("active"); });
+      btn.classList.add("active");
+      levelFilter = btn.getAttribute("data-dl");
+      render();
+    });
     render();
   </script>
 </body>

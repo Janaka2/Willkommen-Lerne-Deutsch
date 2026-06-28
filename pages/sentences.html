@@ -23,6 +23,11 @@
     <div class="controls">
       <input class="search" id="search" type="search" placeholder="Suchen… (German or English)" />
     </div>
+    <div class="controls" id="levelChips" style="margin-top:-0.6rem;">
+      <button class="chip active" data-sl="all">Alle</button>
+      <button class="chip" data-sl="A2"><span class="pill lvl-a2">A2</span></button>
+      <button class="chip" data-sl="B1"><span class="pill lvl-b1">B1</span></button>
+    </div>
 
     <div id="groups"></div>
   </main>
@@ -32,11 +37,15 @@
   <script>
     var groupsEl = document.getElementById("groups");
     var search = document.getElementById("search");
+    var levelChips = document.getElementById("levelChips");
+    var levelFilter = "all";
 
     function render() {
       var q = search.value.trim().toLowerCase();
       groupsEl.innerHTML = "";
       SENTENCE_GROUPS.forEach(function (g) {
+        var gl = g.level || "A2";
+        if (levelFilter !== "all" && gl !== levelFilter) return;
         var items = g.items.filter(function (it) {
           if (!q) return true;
           return (it.de + " " + it.en + " " + g.title).toLowerCase().indexOf(q) !== -1;
@@ -45,7 +54,8 @@
         var card = document.createElement("section");
         card.className = "card";
         card.style.marginBottom = "1.3rem";
-        var h = '<h2 style="margin-top:0;">' + g.title + '</h2>' +
+        var badge = '<span class="pill ' + (gl === "B1" ? "lvl-b1" : "lvl-a2") + '">' + gl + '</span> ';
+        var h = '<h2 style="margin-top:0;">' + badge + g.title + '</h2>' +
                 '<p class="muted" style="margin-top:-0.4rem;">' + g.en + '</p>';
         var rows = items.map(function (it) {
           var note = it.note ? ' <span class="pill tag">' + it.note + '</span>' : "";
@@ -66,6 +76,14 @@
       if (!groupsEl.children.length) groupsEl.innerHTML = '<p class="muted">Nichts gefunden.</p>';
     }
     search.addEventListener("input", render);
+    levelChips.addEventListener("click", function (e) {
+      var btn = e.target.closest(".chip");
+      if (!btn) return;
+      levelChips.querySelectorAll(".chip").forEach(function (c) { c.classList.remove("active"); });
+      btn.classList.add("active");
+      levelFilter = btn.getAttribute("data-sl");
+      render();
+    });
     render();
   </script>
 </body>

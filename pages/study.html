@@ -41,7 +41,7 @@
       <button class="chip active" data-l="all">Alle</button>
       <button class="chip" data-l="A1"><span class="pill lvl-a1">A1</span></button>
       <button class="chip" data-l="A2"><span class="pill lvl-a2">A2</span></button>
-      <button class="chip" data-l="B1">B1</button>
+      <button class="chip" data-l="B1"><span class="pill lvl-b1">B1</span></button>
     </div>
     <div class="controls">
       <span class="muted" style="font-weight:700;">Thema:</span>
@@ -330,7 +330,7 @@
       document.getElementById("back-ex").innerHTML = c.ex;          // coloured example
       document.getElementById("back-ex-en").textContent = c.exEn;
       document.getElementById("back-tags").innerHTML =
-        '<span class="pill ' + (c.level === "A1" ? "lvl-a1" : c.level === "A2" ? "lvl-a2" : "") + '">' +
+        '<span class="pill ' + (c.level === "A1" ? "lvl-a1" : c.level === "A2" ? "lvl-a2" : c.level === "B1" ? "lvl-b1" : "") + '">' +
         c.level + '</span> <span class="pill">' + c.theme + '</span>';
     }
 
