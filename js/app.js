@@ -24,6 +24,7 @@
     { key: "sentences",    label: "Sätze",            href: "pages/sentences.html" },
     { key: "future",       label: "Zukunft",          href: "pages/future.html" },
     { key: "dialogs",      label: "Dialoge",          href: "pages/dialogs.html" },
+    { key: "swiss-german", label: "🇨🇭 Schweizerdeutsch", href: "pages/swiss-german.html" },
     { key: "study",        label: "Lernkarten (FSRS)", href: "pages/study.html" },
     { key: "listening",    label: "Hören & Nachsprechen", href: "pages/listening.html" },
     { key: "speaking",     label: "Sprechen",         href: "pages/speaking.html" },
