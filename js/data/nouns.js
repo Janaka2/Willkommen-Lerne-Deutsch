@@ -414,3 +414,96 @@ window.NOUNS = [
   { de: "Verspätung", art: "die", pl: "Verspätungen", en: "delay", cat: "Abstract & Useful" },
   { de: "Wirkung", art: "die", pl: "Wirkungen", en: "effect", cat: "Abstract & Useful" }
 ];
+
+/* =========================================================================
+   DUAL CODING — meaning images for concrete, picturable nouns.
+   Offline-safe by design: every value is either a BUNDLED emoji (the default)
+   or, if you later add local artwork, a RELATIVE path to a file committed in
+   the repo (e.g. "img/hand.svg"). Never a remote/CDN URL — the site must keep
+   working from file:// with the network off.
+
+   Keyed by the bare German noun. Concrete categories are covered first
+   (Body & Health, Food & Drink, Animals, Home & Furniture, Clothing,
+   Nature/Weather, Transport, plus obvious everyday objects/places/people).
+   Abstract nouns are deliberately omitted — they fall back to a tidy
+   gender-tinted monogram in the UI, so no forced or misleading matches.
+   ========================================================================= */
+window.NOUN_IMG = {
+  /* People & Family */
+  "Mann": "👨", "Frau": "👩", "Kind": "🧒", "Junge": "👦", "Mädchen": "👧",
+  "Baby": "👶", "Vater": "👨", "Mutter": "👩", "Großvater": "👴", "Großmutter": "👵",
+  "Familie": "👪", "Paar": "💑", "Mensch": "🧑",
+
+  /* Body & Health */
+  "Körper": "🧍", "Gesicht": "😊", "Auge": "👁️", "Ohr": "👂", "Nase": "👃",
+  "Mund": "👄", "Zahn": "🦷", "Hand": "✋", "Arm": "💪", "Bein": "🦵", "Fuß": "🦶",
+  "Herz": "❤️", "Arzt": "👨‍⚕️", "Ärztin": "👩‍⚕️", "Medikament": "💊", "Krankenhaus": "🏥",
+
+  /* Home & Furniture */
+  "Haus": "🏠", "Wohnung": "🏢", "Bad": "🛁", "Schlafzimmer": "🛌", "Tür": "🚪",
+  "Fenster": "🪟", "Wand": "🧱", "Stuhl": "🪑", "Bett": "🛏️", "Schrank": "🗄️",
+  "Sofa": "🛋️", "Lampe": "💡", "Spiegel": "🪞", "Garten": "🪴", "Schlüssel": "🔑",
+
+  /* Food & Drink */
+  "Essen": "🍽️", "Brot": "🍞", "Brötchen": "🥖", "Butter": "🧈", "Käse": "🧀",
+  "Ei": "🥚", "Fleisch": "🥩", "Fisch": "🐟", "Obst": "🍇", "Apfel": "🍎",
+  "Banane": "🍌", "Gemüse": "🥦", "Kartoffel": "🥔", "Tomate": "🍅", "Salat": "🥗",
+  "Suppe": "🍲", "Salz": "🧂", "Wasser": "💧", "Milch": "🥛", "Kaffee": "☕",
+  "Tee": "🍵", "Saft": "🧃", "Bier": "🍺", "Wein": "🍷", "Frühstück": "🍳",
+  "Abendessen": "🍝", "Restaurant": "🍴", "Rechnung": "🧾", "Getränk": "🥤",
+
+  /* Clothing */
+  "Kleidung": "👕", "Hemd": "👔", "Hose": "👖", "Kleid": "👗", "Jacke": "🧥",
+  "Mantel": "🧥", "Pullover": "🧶", "Schuh": "👞", "Socke": "🧦", "Hut": "🎩",
+  "Brille": "👓", "Tasche": "👜",
+
+  /* City & Places */
+  "Stadt": "🏙️", "Straße": "🛣️", "Bank": "🏦", "Post": "🏤", "Geschäft": "🏬",
+  "Supermarkt": "🛒", "Markt": "🛍️", "Kino": "🎬", "Museum": "🏛️", "Kirche": "⛪",
+  "Hotel": "🏨", "Café": "☕", "Bibliothek": "📚",
+
+  /* School & Study */
+  "Schule": "🏫", "Buch": "📖", "Heft": "📓", "Stift": "✏️", "Papier": "📄",
+  "Lehrer": "👨‍🏫", "Lehrerin": "👩‍🏫", "Student": "🧑‍🎓", "Nummer": "🔢",
+
+  /* Work & Money */
+  "Geld": "💰", "Euro": "💶", "Computer": "💻", "Büro": "💼",
+
+  /* Time & Calendar */
+  "Uhr": "⌚", "Geburtstag": "🎂", "Datum": "📅",
+
+  /* Nature & Weather (+ animals) */
+  "Wetter": "🌦️", "Sonne": "☀️", "Regen": "🌧️", "Schnee": "❄️", "Wind": "💨",
+  "Wolke": "☁️", "Himmel": "🌤️", "Baum": "🌳", "Blume": "🌸", "Wald": "🌲",
+  "Berg": "⛰️", "See": "🏞️", "Meer": "🌊", "Tier": "🐾", "Hund": "🐶",
+  "Katze": "🐱", "Vogel": "🐦",
+
+  /* Travel & Transport */
+  "Auto": "🚗", "Zug": "🚆", "Bus": "🚌", "Bahn": "🚊", "Fahrrad": "🚲",
+  "Flugzeug": "✈️", "Bahnhof": "🚉", "Flughafen": "🛫", "Haltestelle": "🚏",
+  "Fahrkarte": "🎫", "Reise": "🗺️", "Urlaub": "🏖️", "Koffer": "🧳",
+  "Ausweis": "🪪", "Pass": "🛂",
+
+  /* Technology & Media */
+  "Handy": "📱", "Telefon": "☎️", "E-Mail": "📧", "Fernseher": "📺", "Film": "🎬",
+  "Musik": "🎵", "Foto": "📷", "Zeitung": "📰", "Drucker": "🖨️", "Kabel": "🔌",
+  "USB-Stick": "💾", "Bildschirm": "🖥️",
+
+  /* Everyday Objects */
+  "Glas": "🥃", "Flasche": "🍾", "Teller": "🍽️", "Tasse": "🍵", "Messer": "🔪",
+  "Gabel": "🍴", "Löffel": "🥄", "Schere": "✂️", "Geschenk": "🎁"
+};
+
+/* Merge the emoji onto each noun as an OPTIONAL `img` field. An inline `img`
+   on a noun object (if you ever add one) always wins. */
+window.NOUNS.forEach(function (n) {
+  if (!n.img && window.NOUN_IMG[n.de]) n.img = window.NOUN_IMG[n.de];
+});
+
+/* Look up a meaning image for a bare noun or an "der/die/das X" phrase.
+   Used by decks (study/flashcards) that store words with their article. */
+window.imgFor = function (word) {
+  if (!word) return "";
+  var bare = String(word).replace(/^(der|die|das)\s+/i, "").trim();
+  return window.NOUN_IMG[bare] || "";
+};

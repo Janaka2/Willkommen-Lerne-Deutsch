@@ -9,11 +9,22 @@ window.SENTENCE_GROUPS = [
     level: "A2",
     en: "Introducing yourself & small talk",
     items: [
-      { de: "Ich heiße ___.", en: "My name is ___." },
-      { de: "Ich komme aus ___.", en: "I come from ___." },
-      { de: "Ich wohne in ___.", en: "I live in ___." },
+      { de: "Ich heiße ___.", en: "My name is ___.", slots: [
+        { t: "Ich", role: "Subjekt", c: "nom" }, { t: "heiße", role: "Verb" },
+        { t: "___", role: "Name", fill: true, ex: "Janaka" } ] },
+      { de: "Ich komme aus ___.", en: "I come from ___.", slots: [
+        { t: "Ich", role: "Subjekt", c: "nom" }, { t: "komme", role: "Verb" },
+        { t: "aus", role: "Präp. → Dativ", c: "dat" },
+        { t: "___", role: "Ort", c: "dat", fill: true, ex: "der Schweiz" } ] },
+      { de: "Ich wohne in ___.", en: "I live in ___.", slots: [
+        { t: "Ich", role: "Subjekt", c: "nom" }, { t: "wohne", role: "Verb" },
+        { t: "in", role: "Wo? → Dativ", c: "dat" },
+        { t: "___", role: "Ort", c: "dat", fill: true, ex: "Zürich" } ] },
       { de: "Ich bin ___ Jahre alt.", en: "I am ___ years old." },
-      { de: "Ich arbeite als ___.", en: "I work as a ___." },
+      { de: "Ich arbeite als ___.", en: "I work as a ___.", slots: [
+        { t: "Ich", role: "Subjekt", c: "nom" }, { t: "arbeite", role: "Verb" },
+        { t: "als", role: "als + Nominativ", c: "nom" },
+        { t: "___", role: "Beruf", c: "nom", fill: true, ex: "Ingenieur" } ] },
       { de: "Ich lerne seit ___ Deutsch.", en: "I have been learning German for ___." },
       { de: "Wie geht es Ihnen? — Danke, gut. Und Ihnen?", en: "How are you? — Thanks, fine. And you?" },
       { de: "Freut mich, Sie kennenzulernen.", en: "Nice to meet you." }
@@ -24,13 +35,19 @@ window.SENTENCE_GROUPS = [
     level: "A2",
     en: "Wishes & polite requests",
     items: [
-      { de: "Ich möchte ___.", en: "I would like ___.", note: "polite 'want'" },
+      { de: "Ich möchte ___.", en: "I would like ___.", note: "polite 'want'", slots: [
+        { t: "Ich", role: "Subjekt", c: "nom" }, { t: "möchte", role: "Verb" },
+        { t: "___", role: "Objekt", c: "akk", fill: true, ex: "einen Kaffee" } ] },
       { de: "Ich hätte gern ___.", en: "I'd like ___ (please).", note: "very polite, e.g. shopping" },
       { de: "Könnten Sie mir bitte ___?", en: "Could you please ___ (for me)?" },
-      { de: "Können Sie mir helfen?", en: "Can you help me?" },
+      { de: "Können Sie mir helfen?", en: "Can you help me?", slots: [
+        { t: "Können", role: "Verb" }, { t: "Sie", role: "Subjekt", c: "nom" },
+        { t: "mir", role: "Dativ", c: "dat" }, { t: "helfen", role: "Verb (+ Dativ!)" } ] },
       { de: "Darf ich ___?", en: "May I ___?" },
       { de: "Würden Sie bitte ___?", en: "Would you please ___?" },
-      { de: "Ich brauche ___.", en: "I need ___." },
+      { de: "Ich brauche ___.", en: "I need ___.", slots: [
+        { t: "Ich", role: "Subjekt", c: "nom" }, { t: "brauche", role: "Verb" },
+        { t: "___", role: "Objekt", c: "akk", fill: true, ex: "deine Hilfe" } ] },
       { de: "Einen Moment bitte.", en: "One moment, please." }
     ]
   },
@@ -75,7 +92,10 @@ window.SENTENCE_GROUPS = [
       { de: "Mit ___ werde ich ___.", en: "At (age) ___ I will become ___.", note: "werde = future / become" },
       { de: "Nächstes Jahr werde ich ___.", en: "Next year I will ___.", note: "werden + infinitive at end" },
       { de: "In ___ Jahren werde ich ___ machen.", en: "In ___ years I will do ___." },
-      { de: "Eines Tages würde ich gern ___.", en: "One day I would love to ___.", note: "würde = would (dream)" }
+      { de: "Eines Tages würde ich gern ___.", en: "One day I would love to ___.", note: "würde = would (dream)", slots: [
+        { t: "Eines Tages", role: "Genitiv (Zeit)", c: "gen" }, { t: "würde", role: "Verb" },
+        { t: "ich", role: "Subjekt", c: "nom" }, { t: "gern", role: "" },
+        { t: "___", role: "Wunsch", fill: true, ex: "nach Japan reisen" } ] }
     ]
   },
   {
@@ -83,8 +103,15 @@ window.SENTENCE_GROUPS = [
     level: "A2",
     en: "Talking about the past (Perfekt)",
     items: [
-      { de: "Ich habe ___ gemacht.", en: "I did / made ___." },
-      { de: "Ich bin nach ___ gefahren.", en: "I went / drove to ___.", note: "movement → 'sein'" },
+      { de: "Ich habe ___ gemacht.", en: "I did / made ___.", slots: [
+        { t: "Ich", role: "Subjekt", c: "nom" }, { t: "habe", role: "Hilfsverb" },
+        { t: "___", role: "Objekt", c: "akk", fill: true, ex: "die Aufgabe" },
+        { t: "gemacht", role: "Partizip" } ] },
+      { de: "Ich bin nach ___ gefahren.", en: "I went / drove to ___.", note: "movement → 'sein'", slots: [
+        { t: "Ich", role: "Subjekt", c: "nom" }, { t: "bin", role: "Hilfsverb" },
+        { t: "nach", role: "Präp. → Dativ", c: "dat" },
+        { t: "___", role: "Ziel", c: "dat", fill: true, ex: "Berlin" },
+        { t: "gefahren", role: "Partizip" } ] },
       { de: "Gestern habe ich ___.", en: "Yesterday I ___." },
       { de: "Letzte Woche bin ich ___.", en: "Last week I ___." },
       { de: "Ich habe ___ gegessen / getrunken / gesehen.", en: "I ate / drank / saw ___." },
@@ -97,13 +124,18 @@ window.SENTENCE_GROUPS = [
     level: "A2",
     en: "Preferences & comparisons",
     items: [
-      { de: "Ich mag ___.", en: "I like ___." },
+      { de: "Ich mag ___.", en: "I like ___.", slots: [
+        { t: "Ich", role: "Subjekt", c: "nom" }, { t: "mag", role: "Verb" },
+        { t: "___", role: "Objekt", c: "akk", fill: true, ex: "Kaffee" } ] },
       { de: "Ich ___ gern.", en: "I like to ___.", note: "verb + 'gern'" },
       { de: "Ich ___ lieber ___ als ___.", en: "I prefer to ___ ___ rather than ___." },
       { de: "Am liebsten ___ ich ___.", en: "Most of all I like to ___." },
       { de: "___ ist besser als ___.", en: "___ is better than ___." },
       { de: "___ ist genauso ___ wie ___.", en: "___ is just as ___ as ___." },
-      { de: "Ich interessiere mich für ___.", en: "I am interested in ___." }
+      { de: "Ich interessiere mich für ___.", en: "I am interested in ___.", slots: [
+        { t: "Ich", role: "Subjekt", c: "nom" }, { t: "interessiere mich", role: "Verb" },
+        { t: "für", role: "Präp. → Akkusativ", c: "akk" },
+        { t: "___", role: "Thema", c: "akk", fill: true, ex: "Musik" } ] }
     ]
   },
   {
@@ -111,9 +143,16 @@ window.SENTENCE_GROUPS = [
     level: "A2",
     en: "Asking for information",
     items: [
-      { de: "Wo ist ___?", en: "Where is ___?" },
-      { de: "Wie komme ich zu ___?", en: "How do I get to ___?" },
-      { de: "Wie viel kostet ___?", en: "How much does ___ cost?" },
+      { de: "Wo ist ___?", en: "Where is ___?", slots: [
+        { t: "Wo", role: "Frage" }, { t: "ist", role: "Verb" },
+        { t: "___", role: "Subjekt", c: "nom", fill: true, ex: "der Bahnhof" } ] },
+      { de: "Wie komme ich zu ___?", en: "How do I get to ___?", slots: [
+        { t: "Wie", role: "Frage" }, { t: "komme", role: "Verb" },
+        { t: "ich", role: "Subjekt", c: "nom" }, { t: "zu", role: "Präp. → Dativ", c: "dat" },
+        { t: "___", role: "Ziel", c: "dat", fill: true, ex: "der Post" } ] },
+      { de: "Wie viel kostet ___?", en: "How much does ___ cost?", slots: [
+        { t: "Wie viel", role: "Frage" }, { t: "kostet", role: "Verb" },
+        { t: "___", role: "Subjekt", c: "nom", fill: true, ex: "die Fahrkarte" } ] },
       { de: "Wann ___?", en: "When ___?" },
       { de: "Warum ___?", en: "Why ___?" },
       { de: "Was bedeutet ___?", en: "What does ___ mean?" },
