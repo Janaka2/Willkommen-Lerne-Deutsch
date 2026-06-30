@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sprechen freischalten — Deutsch</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body data-page="unlock">
+  <main class="container narrow">
+    <p class="eyebrow">Ein Satz — viele Sätze · ohne Grammatiktabellen</p>
+    <h1 class="page-title">🔓 Sprechen freischalten</h1>
+    <p class="page-sub">
+      Learn <strong>one</strong> sentence by heart. Then change <strong>only one thing at a time</strong> —
+      the time, the person, the form. You'll produce dozens of correct sentences from a single frame and
+      <strong>feel</strong> the conjugation, no tables required. Always: read the English, <strong>say the
+      German out loud first</strong> 🗣️, <em>then</em> reveal and listen 🔊.
+    </p>
+
+    <div class="callout good">
+      <div class="c-head">🧭 So funktioniert's</div>
+      Pick a seed sentence → pick <strong>one</strong> track → say each line aloud from the English cue →
+      reveal to check (only the <span class="morph">changed word</span> lights up) → at the end,
+      say the whole row in one breath.
+    </div>
+
+    <!-- Browser-support note (shown if speech recognition is unavailable) -->
+    <div class="callout warn" id="no-sr" style="display:none;">
+      <div class="c-head">⚠️ Spracherkennung nicht verfügbar</div>
+      Dein Browser unterstützt die Spracherkennung (SpeechRecognition) nicht — am besten in
+      <strong>Chrome</strong> oder <strong>Edge</strong>. Du kannst trotzdem üben: sprich laut für dich
+      und nutze <strong>„Aufdecken"</strong> zum Vergleichen.
+    </div>
+
+    <!-- ===================== Seed + options ===================== -->
+    <div class="controls">
+      <span class="muted" style="font-weight:700;">Satz:</span>
+      <select class="search" id="seedSel" style="max-width:22rem;"></select>
+    </div>
+    <div class="controls" style="margin-top:-0.4rem; justify-content:space-between;">
+      <label class="gram-toggle">
+        <input type="checkbox" id="gramToggle" /> Grammatik-Namen zeigen
+      </label>
+      <span class="unlock-progress" id="progress"></span>
+    </div>
+
+    <!-- ===================== Core sentence ===================== -->
+    <section class="card unlock-core" id="coreCard">
+      <div class="field-label">Kernsatz — zuerst auswendig lernen</div>
+      <div class="unlock-core-de" id="coreDe">—</div>
+      <div class="unlock-core-en" id="coreEn">—</div>
+      <div class="say-slot" id="coreSay"></div>
+    </section>
+
+    <!-- ===================== Track chips ===================== -->
+    <div class="field-label" style="margin-top:1.2rem;">Eine Sache ändern:</div>
+    <div class="controls" id="trackChips" style="margin-top:0.3rem;">
+      <button class="chip active" data-track="time">⏱️ Zeit</button>
+      <button class="chip" data-track="person">🧑 Person</button>
+      <button class="chip" data-track="form">🔄 Form</button>
+      <button class="chip" data-track="modal">🙂 Modalverb</button>
+      <button class="chip" data-track="build">🧱 Länger</button>
+    </div>
+
+    <!-- ===================== Stepper ===================== -->
+    <section class="card" id="stepCard">
+      <div class="unlock-step-head">
+        <span class="unlock-step-count" id="stepCount">Schritt 1 / 4</span>
+        <span class="pill tag" id="stepLabel">jetzt</span>
+        <span class="pill tag gram-name" id="stepGram" style="display:none;"></span>
+      </div>
+
+      <div class="field-label" style="margin-top:0.8rem;">Sag das auf Deutsch:</div>
+      <div class="drill-prompt" id="stepEn" style="margin:0.4rem 0;">—</div>
+      <div class="say-aloud" id="sayAloud">🗣️ Sag es jetzt laut — dann aufdecken.</div>
+
+      <div class="btn-row center" style="margin-bottom:0.6rem;">
+        <button class="btn primary" id="revealBtn" type="button">Aufdecken 👁️</button>
+      </div>
+
+      <div class="unlock-reveal" id="reveal" style="display:none;">
+        <div class="model-answer" id="stepDe">—</div>
+        <div class="unlock-step-en" id="stepDeEn">—</div>
+        <div class="btn-row center" style="margin-top:0.8rem;">
+          <button class="mic-btn" id="micBtn" title="Sprich jetzt">🎤</button>
+        </div>
+        <div class="sr-transcript" id="tr"></div>
+        <div class="feedback" id="fb"></div>
+      </div>
+
+      <div class="btn-row center" id="navRow">
+        <button class="btn" id="prevBtn" type="button">◀ Zurück</button>
+        <button class="btn good" id="nextBtn" type="button">Weiter ▶</button>
+      </div>
+    </section>
+
+    <!-- ===================== Recap ===================== -->
+    <section class="card unlock-recap" id="recapCard" style="display:none;">
+      <h2 style="margin-top:0;">🎉 Sag die ganze Reihe</h2>
+      <p class="muted" style="margin-top:-0.4rem;">Now say all of them aloud, one after another — then listen.</p>
+      <ol class="unlock-recap-list" id="recapList"></ol>
+      <div class="btn-row center">
+        <button class="btn primary" id="playAllBtn" type="button">🔊 Alles vorlesen</button>
+        <button class="btn good" id="practisedBtn" type="button">✓ Als geübt markieren</button>
+      </div>
+      <div class="feedback" id="doneFb"></div>
+    </section>
+  </main>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/data/speak-seeds.js"></script>
+  <script>
+    (function () {
+      "use strict";
+      var SEEDS = window.SPEAK_SEEDS || [];
+      var TRACK_KEYS = ["time", "person", "form", "modal", "build"];
+
+      /* ---- State ---- */
+      var seedIdx = 0;
+      var track = "time";
+      var stepIdx = 0;
+      var showGram = DE.load("unlockGrammar", false);
+
+      /* ---- Elements ---- */
+      var $ = function (id) { return document.getElementById(id); };
+      var seedSel = $("seedSel"), trackChips = $("trackChips");
+      var coreDe = $("coreDe"), coreEn = $("coreEn"), coreSay = $("coreSay");
+      var stepCount = $("stepCount"), stepLabel = $("stepLabel"), stepGram = $("stepGram");
+      var stepEn = $("stepEn"), reveal = $("reveal"), stepDe = $("stepDe"), stepDeEn = $("stepDeEn");
+      var revealBtn = $("revealBtn"), sayAloud = $("sayAloud");
+      var prevBtn = $("prevBtn"), nextBtn = $("nextBtn");
+      var recapCard = $("recapCard"), recapList = $("recapList"), stepCard = $("stepCard");
+
+      /* ---- Helpers ---- */
+      function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+      function curSeed() { return SEEDS[seedIdx]; }
+      function curTrack() { var s = curSeed(); return (s && s[track]) || []; }
+      function curStep() { return curTrack()[stepIdx] || null; }
+
+      /* Word-level diff → wrap the CHANGED tokens in ONE .morph class.
+         The unchanged words stay calm body colour, so the moving part is the
+         dominant signal. Matching is case/punctuation-insensitive (LCS). */
+      function normTok(t) {
+        return t.toLowerCase().replace(/^[.,!?;:„“”"'()\-–—]+|[.,!?;:„“”"'()\-–—]+$/g, "");
+      }
+      function diffHtml(prevDe, curDe) {
+        var pv = (prevDe || "").split(/\s+/).filter(Boolean);
+        var cv = (curDe || "").split(/\s+/).filter(Boolean);
+        var a = pv.map(normTok), b = cv.map(normTok);
+        var n = a.length, m = b.length, i, j;
+        var dp = [];
+        for (i = 0; i <= n; i++) { dp[i] = []; for (j = 0; j <= m; j++) dp[i][j] = 0; }
+        for (i = 1; i <= n; i++) for (j = 1; j <= m; j++)
+          dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] + 1 : Math.max(dp[i - 1][j], dp[i][j - 1]);
+        var keep = new Array(m).fill(false);
+        i = n; j = m;
+        while (i > 0 && j > 0) {
+          if (a[i - 1] === b[j - 1]) { keep[j - 1] = true; i--; j--; }
+          else if (dp[i - 1][j] >= dp[i][j - 1]) i--; else j--;
+        }
+        return cv.map(function (t, idx) {
+          return keep[idx] ? esc(t) : '<span class="morph">' + esc(t) + "</span>";
+        }).join(" ");
+      }
+      /* Build track grows one slot at a time → diff each line against the
+         PREVIOUS line (only the new slot lights up). Other tracks change one
+         word inside the SAME frame → diff against the core sentence. */
+      function baselineFor(idx) {
+        if (track === "build") return idx > 0 ? curTrack()[idx - 1].de : curSeed().core.de;
+        return curSeed().core.de;
+      }
+
+      /* =================== Rendering =================== */
+      function fillSeeds() {
+        seedSel.innerHTML = SEEDS.map(function (s, i) {
+          return '<option value="' + i + '">' + esc(s.core.de) + "  ·  " + esc(s.cat) + "</option>";
+        }).join("");
+      }
+
+      function renderCore() {
+        var s = curSeed();
+        coreDe.textContent = s.core.de;
+        coreEn.textContent = s.core.en;
+        coreSay.innerHTML = "";
+        coreSay.appendChild(DE.sayButton(s.core.de));
+      }
+
+      function renderTrackChips() {
+        // Disable tracks the current seed doesn't define.
+        trackChips.querySelectorAll(".chip[data-track]").forEach(function (c) {
+          var k = c.getAttribute("data-track");
+          var has = (curSeed()[k] || []).length > 0;
+          c.disabled = !has;
+          c.style.display = has ? "" : "none";
+          c.classList.toggle("active", has && k === track);
+        });
+      }
+
+      function renderStep() {
+        micStop();
+        var steps = curTrack();
+        var st = curStep();
+        reveal.style.display = "none";
+        revealBtn.style.display = "";
+        sayAloud.style.display = "";
+        $("fb").className = "feedback";
+        $("tr").innerHTML = "";
+        if (!st) return;
+        stepCount.textContent = "Schritt " + (stepIdx + 1) + " / " + steps.length;
+        stepLabel.textContent = st.label;
+        stepEn.textContent = st.en;
+        stepDeEn.textContent = st.en;
+        stepDe.innerHTML = diffHtml(baselineFor(stepIdx), st.de);
+        // Grammar name (toggle)
+        if (showGram && st.grammar) { stepGram.textContent = st.grammar; stepGram.style.display = ""; }
+        else stepGram.style.display = "none";
+        prevBtn.disabled = stepIdx === 0;
+        nextBtn.textContent = stepIdx === steps.length - 1 ? "Reihe abschliessen 🎉" : "Weiter ▶";
+      }
+
+      function doReveal() {
+        var st = curStep();
+        if (!st) return;
+        reveal.style.display = "block";
+        revealBtn.style.display = "none";
+        sayAloud.style.display = "none";
+        DE.speak(st.de);
+      }
+
+      /* =================== Recap =================== */
+      function showRecap() {
+        var steps = curTrack();
+        recapList.innerHTML = steps.map(function (st, idx) {
+          return '<li><span class="pill tag">' + esc(st.label) + "</span> " +
+                 '<span class="recap-de" data-de="' + esc(st.de).replace(/"/g, "&quot;") + '">' +
+                 esc(st.de) + "</span></li>";
+        }).join("");
+        recapList.querySelectorAll(".recap-de").forEach(function (el) {
+          el.appendChild(document.createTextNode(" "));
+          el.appendChild(DE.sayButton(el.getAttribute("data-de")));
+        });
+        stepCard.style.display = "none";
+        recapCard.style.display = "block";
+        $("doneFb").className = "feedback";
+        recapCard.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      function backToSteps() {
+        recapCard.style.display = "none";
+        stepCard.style.display = "block";
+      }
+
+      function playAll() {
+        var steps = curTrack(), i = 0;
+        (function next() {
+          if (i >= steps.length) return;
+          DE.speak(steps[i].de, { onend: function () { i++; setTimeout(next, 350); } });
+        })();
+      }
+
+      /* =================== Progress =================== */
+      function practisedList() { return DE.load("unlockPractised", []); }
+      function renderProgress() {
+        var done = practisedList().length;
+        $("progress").textContent = "🔓 " + done + " / " + SEEDS.length + " Sätze geübt";
+      }
+      function markPractised() {
+        var list = practisedList();
+        var id = curSeed().id;
+        if (list.indexOf(id) === -1) list.push(id);
+        DE.store("unlockPractised", list);
+        renderProgress();
+        var fb = $("doneFb");
+        fb.className = "feedback show ok";
+        fb.textContent = "✓ Stark! „" + curSeed().core.de + "“ ist freigeschaltet. Nächsten Satz wählen?";
+      }
+
+      /* =================== Speech recognition (graceful) =================== */
+      var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      var srSupported = !!SR;
+      if (!srSupported) $("no-sr").style.display = "block";
+      function norm(s) {
+        return (s || "").toLowerCase().replace(/[.,!?;:"'„“”()\-–—]/g, "").replace(/\s+/g, " ").trim();
+      }
+      function deburr(s) { return s.replace(/ä/g, "a").replace(/ö/g, "o").replace(/ü/g, "u").replace(/ß/g, "ss"); }
+      function score(target, attempt) {
+        var t = norm(target), a = norm(attempt);
+        var tw = t ? t.split(" ") : [];
+        if (!a) return { level: "bad", ratio: 0 };
+        if (t === a || deburr(t) === deburr(a)) return { level: "ok", ratio: 1 };
+        var aset = a.split(" "), hit = 0;
+        tw.forEach(function (w) { if (aset.some(function (x) { return x === w || deburr(x) === deburr(w); })) hit++; });
+        var ratio = tw.length ? hit / tw.length : 0;
+        return { level: ratio >= 0.6 ? "close" : "bad", ratio: ratio };
+      }
+      function bestScore(target, alts) {
+        var best = { level: "bad", ratio: -1 };
+        (alts.length ? alts : [""]).forEach(function (a) { var s = score(target, a); if (s.ratio > best.ratio) best = s; });
+        return best;
+      }
+      var rec = null, listening = false, micBtn = $("micBtn");
+      function micStop() {
+        if (rec) { try { rec.stop(); } catch (e) {} }
+        listening = false;
+        if (micBtn) micBtn.classList.remove("listening");
+      }
+      micBtn.addEventListener("click", function () {
+        if (!srSupported) { $("no-sr").scrollIntoView({ behavior: "smooth" }); return; }
+        if (listening) { micStop(); return; }
+        var st = curStep(); if (!st) return;
+        var target = st.de, tr = $("tr"), fb = $("fb");
+        tr.innerHTML = "<em>Hört zu …</em>"; fb.className = "feedback";
+        rec = new SR();
+        rec.lang = "de-DE"; rec.interimResults = true; rec.maxAlternatives = 3; rec.continuous = false;
+        rec.onresult = function (e) {
+          var finalT = "", interim = "", alts = [];
+          for (var i = e.resultIndex; i < e.results.length; i++) {
+            var res = e.results[i];
+            if (res.isFinal) { finalT += res[0].transcript; for (var j = 0; j < res.length; j++) alts.push(res[j].transcript); }
+            else interim += res[0].transcript;
+          }
+          if (interim && !finalT) { tr.innerHTML = '<span class="heard">' + esc(interim) + "</span> …"; return; }
+          if (finalT) {
+            tr.innerHTML = 'Gehört: <span class="heard">' + esc(finalT.trim()) + "</span>";
+            var s = bestScore(target, alts);
+            fb.className = "feedback show " + (s.level === "bad" ? "bad" : s.level);
+            fb.textContent = s.level === "ok" ? "✓ Perfekt! Genau richtig."
+              : s.level === "close" ? "Fast! Vergleiche mit der Zeile oben."
+              : "Noch nicht ganz — hör nochmal 🔊 und versuch's wieder.";
+          }
+        };
+        rec.onend = function () { listening = false; micBtn.classList.remove("listening"); };
+        rec.onerror = function (e) { tr.innerHTML = '<span class="muted">Fehler: ' + (e.error || "unbekannt") + " — Mikrofon prüfen.</span>"; };
+        listening = true; micBtn.classList.add("listening");
+        try { rec.start(); } catch (e) { micStop(); }
+      });
+
+      /* =================== Events =================== */
+      seedSel.addEventListener("change", function () {
+        seedIdx = parseInt(seedSel.value, 10) || 0;
+        stepIdx = 0;
+        backToSteps();
+        renderCore();
+        renderTrackChips();
+        // If current track missing on this seed, fall back to first available.
+        if (!(curSeed()[track] || []).length) {
+          track = TRACK_KEYS.filter(function (k) { return (curSeed()[k] || []).length; })[0] || "time";
+          renderTrackChips();
+        }
+        renderStep();
+        DE.speak(curSeed().core.de);
+      });
+
+      trackChips.addEventListener("click", function (e) {
+        var btn = e.target.closest(".chip[data-track]");
+        if (!btn || btn.disabled) return;
+        track = btn.getAttribute("data-track");
+        stepIdx = 0;
+        trackChips.querySelectorAll(".chip").forEach(function (c) { c.classList.remove("active"); });
+        btn.classList.add("active");
+        backToSteps();
+        renderStep();
+      });
+
+      revealBtn.addEventListener("click", doReveal);
+      prevBtn.addEventListener("click", function () { if (stepIdx > 0) { stepIdx--; renderStep(); } });
+      nextBtn.addEventListener("click", function () {
+        var steps = curTrack();
+        if (stepIdx < steps.length - 1) { stepIdx++; renderStep(); }
+        else showRecap();
+      });
+      $("playAllBtn").addEventListener("click", playAll);
+      $("practisedBtn").addEventListener("click", markPractised);
+      $("gramToggle").addEventListener("change", function () {
+        showGram = this.checked; DE.store("unlockGrammar", showGram); renderStep();
+      });
+
+      /* =================== Init =================== */
+      if (!SEEDS.length) {
+        document.querySelector("main").innerHTML = '<p class="muted">Keine Sätze geladen.</p>';
+        return;
+      }
+      $("gramToggle").checked = showGram;
+      fillSeeds();
+      renderCore();
+      renderTrackChips();
+      renderStep();
+      renderProgress();
+    })();
+  </script>
+</body>
+</html>

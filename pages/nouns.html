@@ -6,7 +6,7 @@
   <title>Nomen mit Artikeln — Deutsch A2</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
-<body data-page="nouns">
+<body data-page="nouns" data-legend="gender">
   <main class="container">
     <p class="eyebrow">Wortschatz · Color-coded</p>
     <h1 class="page-title">🔤 Nomen mit Artikeln</h1>
@@ -104,7 +104,13 @@
           var row = document.createElement("div");
           row.className = "vrow " + n.art;
           var lvl = nounLevel(n.de);
+          // Dual coding: meaning-emoji when we have one, else a gender-tinted
+          // monogram chip so rows stay visually even (never a broken image).
+          var media = n.img
+            ? DE.mediaMarkup(n.img)
+            : '<span class="vmono ' + n.art + '">' + n.de.charAt(0) + '</span>';
           row.innerHTML =
+            '<span class="vmedia">' + media + '</span>' +
             '<span class="pill ' + n.art + '">' + n.art + '</span>' +
             '<span><span class="word">' + n.de + '</span> ' +
               '<span class="pill lvl-' + lvl.toLowerCase() + '">' + lvl + '</span> ' +

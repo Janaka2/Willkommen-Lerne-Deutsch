@@ -51,6 +51,7 @@
         <div class="fc-inner">
           <div class="fc-face fc-front">
             <div>
+              <div class="fc-emoji" id="front-emoji"></div>
               <div class="fc-word" id="front-word">—</div>
               <div class="fc-sub" id="front-sub"></div>
               <div class="fc-hint">Klick zum Umdrehen (click to flip)</div>
@@ -66,12 +67,12 @@
       </div>
     </div>
 
-    <div class="btn-row center" id="answer-row" style="justify-content:center; display:none;">
+    <div class="btn-row center" id="answer-row" style="display:none;">
       <button class="btn lg" id="btn-again" style="border-color:var(--bad);color:var(--bad);">↻ Nochmal</button>
       <button class="btn lg" id="btn-hard">Schwer</button>
       <button class="btn good lg" id="btn-good">✓ Gewusst</button>
     </div>
-    <div class="btn-row center" id="flip-row" style="justify-content:center;">
+    <div class="btn-row center" id="flip-row">
       <button class="btn primary lg" id="btn-flip">Antwort zeigen 🔊</button>
     </div>
 
@@ -85,7 +86,7 @@
       <strong>Nochmal</strong> sends it back to box 1. Intervals: Box 1 = same day, 2 = 1 day, 3 = 3 days,
       4 = 7 days, 5 = 16 days. Reach Box 5 = learned. All progress is saved on this device only.
     </div>
-    <div class="btn-row center" style="justify-content:center;">
+    <div class="btn-row center">
       <button class="btn" id="reset">Fortschritt für dieses Deck zurücksetzen</button>
     </div>
   </main>
@@ -115,7 +116,8 @@
             de: n.art + " " + n.de,
             deSub: "Plural: " + n.pl,
             en: n.en,
-            speak: n.art + " " + n.de
+            speak: n.art + " " + n.de,
+            img: n.img || ""   // dual coding: meaning emoji on the recall side
           };
         });
       }
@@ -192,6 +194,10 @@
 
       current = dueCards[Math.floor(Math.random() * Math.min(dueCards.length, 12))];
       var frontIsEN = dir === "en2de";
+      // Dual coding: show the meaning emoji large on the prompt side so the
+      // learner links picture → German before flipping. Empty for non-noun decks.
+      document.getElementById("front-emoji").innerHTML =
+        current.img ? DE.mediaMarkup(current.img, "lg") : "";
       document.getElementById("front-word").textContent = frontIsEN ? current.en : current.de;
       document.getElementById("front-sub").textContent = frontIsEN ? "" : current.deSub;
       document.getElementById("back-word").textContent = frontIsEN ? current.de : current.en;

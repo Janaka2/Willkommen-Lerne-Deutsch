@@ -6,7 +6,7 @@
   <title>Sprechen & Sätze bauen — Deutsch A2</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
-<body data-page="speaking">
+<body data-page="speaking" data-legend="case">
   <main class="container narrow">
     <p class="eyebrow">Output macht dich flüssig · selbst produzieren</p>
     <h1 class="page-title">🎤 Sprechen & Sätze bauen</h1>
@@ -35,6 +35,7 @@
 
     <!-- ===================== SPEAK MODE ===================== -->
     <section id="panel-speak">
+      <div class="callout good" id="from-sentences" style="display:none;"></div>
       <div class="controls">
         <span class="muted" style="font-weight:700;">Niveau:</span>
         <button class="chip active" data-sl="all">Alle</button>
@@ -44,7 +45,7 @@
       </div>
 
       <div class="card" style="text-align:center;">
-        <div class="muted" style="font-weight:700; text-transform:uppercase; font-size:0.8rem; letter-spacing:0.04em;">Sag das auf Deutsch:</div>
+        <div class="field-label">Sag das auf Deutsch:</div>
         <div class="drill-prompt" id="sp-en" style="margin:0.5rem 0;">—</div>
         <div class="listen-word" id="sp-hint"></div>
 
@@ -62,7 +63,7 @@
         </div>
       </div>
 
-      <div class="btn-row center" style="justify-content:center;">
+      <div class="btn-row center">
         <button class="btn" id="show-speak">Antwort zeigen 🔊</button>
         <button class="btn primary" id="next-speak">Weiter →</button>
       </div>
@@ -79,7 +80,7 @@
       </div>
 
       <div class="card">
-        <div class="muted" style="font-weight:700; text-transform:uppercase; font-size:0.8rem; letter-spacing:0.04em;">Bau den ganzen Satz auf Deutsch:</div>
+        <div class="field-label">Bau den ganzen Satz auf Deutsch:</div>
         <div class="drill-prompt" id="dr-en" style="margin:0.5rem 0;">—</div>
         <div class="listen-word" id="dr-hint" style="margin-bottom:0.8rem;"></div>
 
@@ -99,7 +100,7 @@
         </div>
       </div>
 
-      <div class="btn-row center" style="justify-content:center;">
+      <div class="btn-row center">
         <button class="btn primary" id="next-drill">Weiter →</button>
       </div>
     </section>
@@ -214,9 +215,8 @@
           return speakLevel === "all" || c.level === speakLevel;
         });
       }
-      function spNext() {
-        var pool = spPool();
-        spCard = pool[Math.floor(Math.random() * pool.length)] || null;
+      function spShow(card) {
+        spCard = card;
         spRevealed = false;
         document.getElementById("tr-speak").innerHTML = "";
         document.getElementById("fb-speak").className = "feedback";
@@ -229,6 +229,10 @@
         document.getElementById("sp-en").textContent = spCard.exEn;
         document.getElementById("sp-hint").textContent =
           "💡 " + spCard.de + " — " + spCard.en + "  ·  " + spCard.level + " · " + spCard.theme;
+      }
+      function spNext() {
+        var pool = spPool();
+        spShow(pool[Math.floor(Math.random() * pool.length)] || null);
       }
       function spReveal() {
         if (!spCard) return;
@@ -387,8 +391,39 @@
       // Expose pure logic for testing without a real microphone.
       window.SPEAKING = { score: score, bestScore: bestScore, norm: norm };
 
+      /* ---- Practice a frame sent from sentences.html ----
+         A "🎤 Üben" tap there stores the frame in localStorage; we consume it
+         once and load it as the first speak card, colour-coded the same way. */
+      function loadPracticeFrame(pf) {
+        var banner = document.getElementById("from-sentences");
+        banner.innerHTML =
+          '<div class="c-head">🧱 Aus „Satzmuster": sag diesen Satz</div>' +
+          '<div class="model-answer" style="font-size:1.1rem;">' + DE.slotsModelHtml(pf.slots, pf.de) + '</div>' +
+          '<div class="muted" style="margin-top:0.3rem;">' + pf.en + '</div>' +
+          '<button class="btn slot-back" type="button" style="margin-top:0.6rem;">Andere Karten üben</button>';
+        banner.style.display = "block";
+        banner.querySelector(".slot-back").addEventListener("click", function () {
+          banner.style.display = "none";
+          spNext();
+        });
+        spShow({
+          de: DE.slotsModelText(pf.slots, pf.de),
+          en: pf.en,
+          ex: DE.slotsModelHtml(pf.slots, pf.de),
+          exEn: pf.en,
+          level: "Satzmuster",
+          theme: "Satz bauen"
+        });
+      }
+
       // Init
-      spNext();
+      var pf = DE.load("practiceFrame", null);
+      if (pf && pf.slots && pf.slots.length) {
+        DE.store("practiceFrame", null); // consume once
+        loadPracticeFrame(pf);
+      } else {
+        spNext();
+      }
       drNext();
     })();
   </script>

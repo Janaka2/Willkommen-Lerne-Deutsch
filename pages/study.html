@@ -71,6 +71,7 @@
           <div class="fc-face fc-front">
             <div>
               <div class="fc-dir-badge" id="front-badge">DE → EN</div>
+              <div class="fc-emoji" id="front-emoji"></div>
               <div class="fc-word" id="front-word">—</div>
               <div class="fc-example" id="front-ex"></div>
               <div class="fc-hint">Sag die Antwort laut · dann Leertaste zum Umdrehen</div>
@@ -89,7 +90,7 @@
     </div>
 
     <!-- Flip button -->
-    <div class="btn-row center" id="flip-row" style="justify-content:center;">
+    <div class="btn-row center" id="flip-row">
       <button class="btn primary lg" id="btn-flip">Antwort zeigen (Leertaste)</button>
     </div>
 
@@ -142,6 +143,9 @@
 
   <script src="../js/app.js"></script>
   <script src="../js/data/cards.js"></script>
+  <!-- Noun meaning-emoji map (window.imgFor) for dual coding on the recall side.
+       Pure local data; keeps the page fully offline. -->
+  <script src="../js/data/nouns.js"></script>
   <!-- ts-fsrs UMD build: a classic global script (window.FSRS) so the page
        also works when opened directly from disk (file://), where ES-module
        imports are blocked by the browser. -->
@@ -321,6 +325,11 @@
 
       // FRONT
       document.getElementById("front-badge").textContent = recog ? "DE → EN" : "EN → DE";
+      // Dual coding: if this card is a concrete noun with a meaning emoji, show
+      // it large on the recall (front) side so picture → German is reinforced.
+      var emoji = (window.imgFor ? window.imgFor(c.de) : "");
+      document.getElementById("front-emoji").innerHTML =
+        emoji ? DE.mediaMarkup(emoji, "lg") : "";
       document.getElementById("front-word").textContent = recog ? c.de : c.en;
       // Recognition shows the example as a context hint; production hides it (you produce it).
       document.getElementById("front-ex").innerHTML = recog ? c.ex : "";

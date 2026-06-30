@@ -6,7 +6,7 @@
   <title>Satzmuster zum Sprechen — Deutsch A2</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
-<body data-page="sentences">
+<body data-page="sentences" data-legend="case">
   <main class="container narrow">
     <p class="eyebrow">Sprechen · Satzbausteine</p>
     <h1 class="page-title">💬 Satzmuster — flüssig sprechen</h1>
@@ -29,6 +29,15 @@
       <button class="chip" data-sl="B1"><span class="pill lvl-b1">B1</span></button>
     </div>
 
+    <div class="callout good" style="margin-bottom:1rem;">
+      <div class="c-head">🧱 Satzbausteine mit Farbe</div>
+      Some frames show their grammar as coloured <strong>slot blocks</strong> —
+      <span class="c-nom">Nom</span> · <span class="c-akk">Akk</span> ·
+      <span class="c-dat">Dat</span> · <span class="c-gen">Gen</span>. Read the pattern, say it
+      yourself, then tap <strong>„Antwort zeigen"</strong> — or <strong>🎤 Üben</strong> to practise it
+      out loud on the Sprechen page.
+    </div>
+
     <div id="groups"></div>
   </main>
 
@@ -39,10 +48,23 @@
     var search = document.getElementById("search");
     var levelChips = document.getElementById("levelChips");
     var levelFilter = "all";
+    var rendered = [];   // idx → frame, so buttons can find their item
+
+    function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+    // Build the row of labelled, case-coloured slot blocks.
+    function slotFrameHtml(slots) {
+      return '<div class="slot-frame">' + slots.map(function (s) {
+        var cls = "slot" + (s.c ? " " + s.c : "") + (s.fill ? " fill" : "");
+        var role = '<span class="slot-role">' + (s.role ? esc(s.role) : "&nbsp;") + "</span>";
+        return '<span class="' + cls + '"><span class="slot-w">' + esc(s.t) + "</span>" + role + "</span>";
+      }).join("") + "</div>";
+    }
 
     function render() {
       var q = search.value.trim().toLowerCase();
       groupsEl.innerHTML = "";
+      rendered = [];
       SENTENCE_GROUPS.forEach(function (g) {
         var gl = g.level || "A2";
         if (levelFilter !== "all" && gl !== levelFilter) return;
@@ -59,11 +81,27 @@
                 '<p class="muted" style="margin-top:-0.4rem;">' + g.en + '</p>';
         var rows = items.map(function (it) {
           var note = it.note ? ' <span class="pill tag">' + it.note + '</span>' : "";
-          return '<div class="ex" data-de="' + it.de.replace(/"/g, "&quot;") + '">' +
-                   '<span class="de">' + it.de + '</span>' + note +
-                   ' <span class="say-slot"></span><br>' +
-                   '<span class="en">' + it.en + '</span>' +
-                 '</div>';
+          var html = '<div class="ex" data-de="' + it.de.replace(/"/g, "&quot;") + '">';
+          if (it.slots && it.slots.length) {
+            var i = rendered.push(it) - 1;
+            html += slotFrameHtml(it.slots) +
+                    '<span class="de">' + it.de + '</span>' + note +
+                    ' <span class="say-slot"></span><br>' +
+                    '<span class="en">' + it.en + '</span>' +
+                    '<div class="slot-build">' +
+                      '<button class="btn slot-show" type="button" data-i="' + i + '">Antwort zeigen</button>' +
+                      '<button class="btn slot-practice" type="button" data-i="' + i + '">🎤 Üben</button>' +
+                    '</div>' +
+                    '<div class="slot-reveal" id="rev-' + i + '">' +
+                      '<div class="muted" style="font-size:0.85rem;">Modell-Antwort:</div>' +
+                      '<div class="model-answer">' + DE.slotsModelHtml(it.slots, it.de) + '</div>' +
+                    '</div>';
+          } else {
+            html += '<span class="de">' + it.de + '</span>' + note +
+                    ' <span class="say-slot"></span><br>' +
+                    '<span class="en">' + it.en + '</span>';
+          }
+          return html + '</div>';
         }).join("");
         card.innerHTML = h + '<div class="ex list" style="margin-top:0.6rem;">' + rows + '</div>';
         groupsEl.appendChild(card);
@@ -75,6 +113,32 @@
       });
       if (!groupsEl.children.length) groupsEl.innerHTML = '<p class="muted">Nichts gefunden.</p>';
     }
+
+    // Reveal the model answer / send a frame to the Sprechen page.
+    groupsEl.addEventListener("click", function (e) {
+      var show = e.target.closest(".slot-show");
+      if (show) {
+        var rev = document.getElementById("rev-" + show.getAttribute("data-i"));
+        if (rev) {
+          rev.classList.toggle("show");
+          show.textContent = rev.classList.contains("show") ? "Verbergen" : "Antwort zeigen";
+          if (rev.classList.contains("show")) {
+            var it = rendered[show.getAttribute("data-i")];
+            if (it) DE.speak(DE.slotsModelText(it.slots, it.de));
+          }
+        }
+        return;
+      }
+      var prac = e.target.closest(".slot-practice");
+      if (prac) {
+        var f = rendered[prac.getAttribute("data-i")];
+        if (f) {
+          DE.store("practiceFrame", { de: f.de, en: f.en, slots: f.slots });
+          window.location.href = "speaking.html";
+        }
+      }
+    });
+
     search.addEventListener("input", render);
     levelChips.addEventListener("click", function (e) {
       var btn = e.target.closest(".chip");
