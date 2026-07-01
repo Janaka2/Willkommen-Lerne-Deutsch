@@ -987,6 +987,168 @@ hr.soft { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
   .nav-group.open .nav-menu { display: block; }
 }
 
+/* =========================================================================
+   KERNWORTSCHATZ — frequency list + honest coverage meter
+   Reuses existing tokens (--accent, --surface, --border, gender vars) and the
+   shared .progress-bar / .vrow / .chip components. No new colour system.
+   ========================================================================= */
+
+/* small button variant (used by the "+ Lernen" action) */
+.btn.sm { font-size: 0.85rem; padding: 0.35rem 0.8rem; }
+
+/* ---- coverage meter card ---- */
+.cover-card { margin: 1.2rem 0 1.6rem; }
+.cover-top { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.cover-big {
+  font-size: 2.8rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--accent);
+  display: flex;
+  align-items: baseline;
+}
+.cover-big .cover-unit { font-size: 1.4rem; margin-left: 0.1rem; }
+.cover-lead { font-weight: 700; font-size: 1.05rem; }
+.cover-sub { font-size: 0.92rem; margin-top: 0.15rem; }
+.cover-note { font-size: 0.85rem; margin: 0.6rem 0 0; }
+
+/* ---- compact meter on the home progress card ---- */
+.cover-mini { margin: 1rem 0 0; }
+.cover-mini-row { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.45rem; }
+.cover-mini-pct { font-size: 1.5rem; font-weight: 800; color: var(--accent); }
+.cover-mini-lbl { font-weight: 700; font-size: 0.95rem; }
+.cover-mini-lbl .muted { font-weight: 400; }
+
+/* ---- frequency rows (extend .vrow with a rank badge + actions) ---- */
+.vrow.kw { grid-template-columns: auto 1fr auto; }
+.vrow.kw.is-strong { border-left-color: var(--good); }
+.rank-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.6rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  color: var(--text-soft);
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.kw-main { display: flex; align-items: baseline; gap: 0.4rem; flex-wrap: wrap; }
+.kw-main .word { font-size: 1.1rem; font-weight: 700; }
+.kw-tick { color: var(--good); font-weight: 800; }
+.kw-actions { display: flex; align-items: center; gap: 0.4rem; }
+.btn.kw-learn.pinned { background: var(--good); border-color: var(--good); color: #fff; cursor: default; }
+
+@media (max-width: 560px) {
+  .cover-big { font-size: 2.2rem; }
+  .vrow.kw { gap: 0.5rem; }
+  .rank-badge { min-width: 2.2rem; }
+}
+
+/* =========================================================================
+   REDEMITTEL / CHUNKS — whole-phrase rows (reuse .vrow, override the grid)
+   ========================================================================= */
+.vrow.chunk { grid-template-columns: 1fr auto; align-items: start; }
+.vrow.chunk .word { font-size: 1.08rem; font-weight: 700; line-height: 1.4; }
+.vrow.chunk .en { color: var(--text-soft); font-style: italic; }
+.chunk-main { min-width: 0; }
+.chunk-actions { display: flex; align-items: center; gap: 0.4rem; white-space: nowrap; }
+
+@media (max-width: 560px) {
+  .vrow.chunk { gap: 0.5rem; }
+  .chunk-actions { flex-direction: column; align-items: flex-end; gap: 0.3rem; }
+}
+
+/* =========================================================================
+   THEMEN-GESPRÄCHE — comprehensible-input texts + produce-first prompts
+   Reuses existing tokens (--accent, --surface, --border, .card, .callout,
+   .progress-bar, .vrow, .chip, .model-answer, .feedback, .mic-btn). No new
+   colour system.
+   ========================================================================= */
+.topic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 0.6rem;
+  margin: 1rem 0 1.4rem;
+}
+.topic-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  text-align: left;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.topic-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.topic-card.active { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.topic-card .tc-title { font-weight: 700; }
+
+.topic-head { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin: 0.4rem 0 0.8rem; }
+
+/* ---- % bekannt meter ---- */
+.known-meter { margin: 0 0 1rem; }
+.known-top { display: flex; align-items: center; gap: 1rem; }
+.known-pct { font-size: 2.2rem; font-weight: 800; line-height: 1; color: var(--accent); font-variant-numeric: tabular-nums; }
+.known-lead { font-weight: 700; }
+.known-sub { font-size: 0.9rem; margin-top: 0.15rem; }
+.known-meter.is-ready .known-pct { color: var(--good); }
+.known-meter.is-ready .progress-bar > span { background: var(--good); }
+.known-meter.is-learn .known-pct { color: var(--warn); }
+.known-meter.is-learn .progress-bar > span { background: var(--warn); }
+
+/* ---- reader (sentence rows with tappable words) ---- */
+.reader { margin: 0.6rem 0 1.2rem; }
+.sentence-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem;
+  align-items: start;
+  padding: 0.45rem 0;
+  border-bottom: 1px dashed var(--border);
+}
+.sentence-row:last-child { border-bottom: none; }
+.sentence-de { font-size: 1.18rem; line-height: 1.7; }
+.en-line { color: var(--text-soft); font-style: italic; font-size: 0.98rem; margin-top: 0.2rem; }
+
+/* tappable words */
+.tw { cursor: pointer; border-radius: 3px; padding: 0 1px; transition: background 0.1s; }
+.tw:hover { background: var(--bg-soft); }
+.tw.tw-new { border-bottom: 2px dotted var(--accent); }
+
+/* word popover */
+.word-pop {
+  position: absolute;
+  z-index: 60;
+  max-width: 260px;
+  padding: 0.6rem 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+.word-pop .wp-head { display: flex; align-items: center; gap: 0.4rem; }
+.word-pop .wp-de { font-weight: 800; font-size: 1.05rem; }
+.word-pop .wp-en { color: var(--text-soft); margin-top: 0.2rem; }
+
+/* ---- output prompts ---- */
+.output-sec { margin-top: 1.6rem; }
+.prompt-card { margin: 0.7rem 0; }
+
+@media (max-width: 560px) {
+  .topic-grid { grid-template-columns: 1fr; }
+  .known-pct { font-size: 1.8rem; }
+  .sentence-de { font-size: 1.08rem; }
+}
+
 @media print {
   .site-header, .say, .footer, .controls, .btn-row { display: none; }
 }
