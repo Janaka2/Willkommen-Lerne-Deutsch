@@ -84,7 +84,12 @@
 
     <section class="home-section">
       <div class="section-head"><h2>🔤 Wortschatz</h2><span class="s-sub">Wörter & Sätze</span></div>
-      <div class="grid grid-2">
+      <div class="grid grid-3">
+        <a class="tile" href="pages/kernwortschatz.html">
+          <span class="ico">📊</span>
+          <div class="t-title">Kernwortschatz</div>
+          <div class="t-desc">The most frequent German words, in real corpus order. An honest coverage meter shows how much everyday speech you can already follow.</div>
+        </a>
         <a class="tile" href="pages/nouns.html">
           <span class="ico">🔤</span>
           <div class="t-title">Nomen mit Artikeln</div>
@@ -136,6 +141,16 @@
           <div class="t-title">Sprechen & Sätze bauen</div>
           <div class="t-desc">Say the German out loud and let your mic check it, or build a whole sentence yourself and reveal the case-coloured model answer.</div>
         </a>
+        <a class="tile" href="pages/redemittel.html">
+          <span class="ico">🗣️</span>
+          <div class="t-title">Redemittel</div>
+          <div class="t-desc">Ready-made phrases grouped by function — agree, disagree, order, give an opinion. Learn whole chunks and speak fluently, not word-by-word.</div>
+        </a>
+        <a class="tile" href="pages/themen.html">
+          <span class="ico">💬</span>
+          <div class="t-title">Themen-Gespräche</div>
+          <div class="t-desc">Short texts on your own world — work, family, travel, calm. Tap any word for its meaning, see how much you already know, then speak about your life before revealing a model answer.</div>
+        </a>
         <a class="tile" href="pages/unlock.html">
           <span class="ico">🔓</span>
           <div class="t-title">Sprechen freischalten</div>
@@ -173,8 +188,17 @@
         <div class="stat"><div class="n" id="st-cards">0</div><div class="l">heute geübt</div></div>
         <div class="stat"><div class="n" id="st-plan">0%</div><div class="l">Tagesplan</div></div>
       </div>
+      <div class="cover-mini" id="cover-mini" hidden>
+        <div class="cover-mini-row">
+          <span class="cover-mini-pct"><span id="cm-pct">0</span>%</span>
+          <span class="cover-mini-lbl">der Alltagssprache verständlich
+            <span class="muted" id="cm-sub">· 0 von 0 Top-1000-Wörtern gefestigt</span></span>
+        </div>
+        <div class="progress-bar"><span id="cm-bar"></span></div>
+      </div>
       <div class="btn-row center" style="margin:1rem 0 0;">
-        <a class="btn" href="pages/progress.html">📊 Ganzer Fortschritt</a>
+        <a class="btn" href="pages/kernwortschatz.html">📊 Kernwortschatz & Abdeckung</a>
+        <a class="btn" href="pages/progress.html">📈 Ganzer Fortschritt</a>
       </div>
     </div>
 
@@ -187,6 +211,8 @@
 
   <script src="js/app.js"></script>
   <script src="js/data/cards.js"></script>
+  <script src="js/data/frequency.js"></script>
+  <script src="js/freq-util.js"></script>
   <script src="js/vendor/ts-fsrs.umd.js"></script>
   <script src="js/progress.js"></script>
   <script>
@@ -211,6 +237,16 @@
       var done = Object.keys(plan).filter(function (k) { return plan[k]; }).length;
       var pct = totalTasks ? Math.round((done / totalTasks) * 100) : 0;
       document.getElementById("st-plan").textContent = pct + "%";
+
+      // Compact speech-coverage meter (same honest FSRS math as Kernwortschatz).
+      if (window.FreqUtil) {
+        var cov = FreqUtil.coverage(1000);
+        document.getElementById("cm-pct").textContent = cov.speechPct;
+        document.getElementById("cm-bar").style.width = Math.min(100, cov.speechPct) + "%";
+        document.getElementById("cm-sub").textContent =
+          "· " + cov.known + " von " + cov.learnable + " Top-1000-Wörtern gefestigt";
+        document.getElementById("cover-mini").hidden = false;
+      }
     })();
   </script>
 </body>
