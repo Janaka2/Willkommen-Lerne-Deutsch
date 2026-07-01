@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Themen-Gespräche — über deine Welt sprechen</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body data-page="themen">
+  <main class="container">
+    <p class="eyebrow">Üben · verstehen &amp; sprechen</p>
+    <h1 class="page-title">💬 Themen-Gespräche</h1>
+    <p class="page-sub">
+      Kurze Texte über <strong>deine eigene Welt</strong> — Arbeit, Familie, Reisen, Ruhe.
+      Lies oder hör 🔊, tipp auf <strong>jedes Wort</strong> für die Bedeutung, und sieh mit dem
+      Balken, wie viel du schon kennst. Danach kommt der wichtige Teil: <strong>sprich zuerst
+      selbst</strong> über dein Leben, dann deck die Muster-Antwort auf.
+    </p>
+
+    <!-- TOPIC picker -->
+    <div class="topic-grid" id="topicGrid" aria-label="Thema wählen"></div>
+
+    <!-- SELECTED topic -->
+    <section id="topicView" style="display:none;">
+      <div class="topic-head">
+        <h2 id="tvTitle" style="margin:0;"></h2>
+        <span id="tvLevel"></span>
+      </div>
+
+      <!-- % bekannt meter -->
+      <div class="card known-meter" id="knownCard">
+        <div class="known-top">
+          <div class="known-pct" id="knPct">–%</div>
+          <div>
+            <div class="known-lead" id="knLead">Wie viel kennst du schon?</div>
+            <div class="muted known-sub" id="knSub"></div>
+          </div>
+        </div>
+        <div class="progress-bar" style="margin-top:0.7rem;"><span id="knBar"></span></div>
+      </div>
+
+      <!-- controls -->
+      <div class="controls">
+        <button class="chip active" id="btnPlayAll" title="Ganzen Text vorlesen">🔊 Alles vorlesen</button>
+        <button class="chip" id="btnToggleEn">🇬🇧 Englisch zeigen</button>
+        <span class="muted" style="margin-left:auto;">Tipp auf ein Wort für die Bedeutung</span>
+      </div>
+
+      <!-- reading text (sentence rows, tappable words) -->
+      <div class="reader" id="topicText"></div>
+
+      <!-- unknown words / ready callout -->
+      <div id="unknownBox"></div>
+
+      <!-- OUTPUT: produce-first prompts -->
+      <section class="output-sec">
+        <h2>🗣️ Jetzt du — sprich über dich</h2>
+        <p class="muted" style="margin-top:-0.3rem;">
+          Antworte zuerst laut über <strong>dein eigenes Leben</strong>. Erst danach die Muster-Antwort aufdecken.
+        </p>
+        <div class="callout warn" id="no-sr" style="display:none;">
+          <div class="c-head">🎤 Kein Mikrofon-Check</div>
+          Dein Browser unterstützt die Spracherkennung nicht — am besten in Chrome. Du kannst trotzdem
+          laut sprechen und dann aufdecken, um zu vergleichen.
+        </div>
+        <div id="promptList"></div>
+      </section>
+    </section>
+  </main>
+
+  <!-- shared word popover -->
+  <div class="word-pop" id="wordPop" style="display:none;" role="dialog" aria-label="Wortbedeutung"></div>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/data/cards.js"></script>
+  <script src="../js/data/nouns.js"></script>
+  <script src="../js/data/verbs.js"></script>
+  <script src="../js/data/frequency.js"></script>
+  <script src="../js/freq-util.js"></script>
+  <script src="../js/vendor/ts-fsrs.umd.js"></script>
+  <script src="../js/progress.js"></script>
+  <script src="../js/data/topics.js"></script>
+  <script>
+    (function () {
+      "use strict";
+      var TOPICS = window.TOPICS || [];
+      var $ = function (id) { return document.getElementById(id); };
+
+      /* Words in the top FREE_RANK of the frequency list are treated as already
+         known (function words + the most common vocabulary). Only content words
+         beyond that — and singled out in a topic's glossary — get tracked via
+         real FSRS memory, so the meter can only rise by genuine learning. */
+      var FREE_RANK = 100;
+
+      var curTopic = TOPICS[0] || null;
+      var showEn = false;
+
+      function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+      function slug(s) {
+        return String(s).toLowerCase()
+          .replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss")
+          .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+      }
+      function levelPill(lvl) {
+        var cls = lvl === "A1" ? "lvl-a1" : lvl === "A2" ? "lvl-a2" : lvl === "B1" ? "lvl-b1" : "";
+        return '<span class="pill ' + cls + '">' + esc(lvl) + "</span>";
+      }
+      function states() {
+        return (window.PROG && PROG.loadStates) ? PROG.loadStates() : {};
+      }
+
+      /* ---- glossary helpers -------------------------------------------- */
+      function glossOf(topic) { return (topic && topic.glossary) || []; }
+      // The FSRS-schedulable id for a glossary word: an existing study card if
+      // one matches, otherwise a synthesized id we also use when adding it.
+      function glossCardId(gw) {
+        var info = window.FreqUtil ? FreqUtil.info(gw.de) : null;
+        return (info && info.cardId) ? info.cardId : "topic_" + slug(gw.de);
+      }
+      function glossKnown(gw, st) {
+        if (!window.FreqUtil) return false;
+        var rank = FreqUtil.rankOf(gw.de);
+        if (rank != null && rank <= FREE_RANK) return true;   // very common already
+        return FreqUtil.isStrongCard(st, glossCardId(gw));      // durable FSRS memory
+      }
+
+      /* ---- tap-a-word lookup ------------------------------------------- */
+      function glossMatch(raw) {
+        if (!window.FreqUtil) return null;
+        var lem = FreqUtil.normalize(raw);
+        var g = glossOf(curTopic);
+        for (var i = 0; i < g.length; i++) {
+          var gl = FreqUtil.normalize(g[i].de);
+          if (gl === lem) return g[i];
+          // token is one part of a multi-word gloss (e.g. "freuen" in "sich freuen auf")
+          if ((" " + gl + " ").indexOf(" " + lem + " ") !== -1 && lem.length >= 3) return g[i];
+        }
+        return null;
+      }
+      function lookupWord(raw) {
+        var gm = glossMatch(raw);
+        if (gm) return { de: gm.de, en: gm.en };
+        var info = window.FreqUtil ? FreqUtil.info(raw) : null;
+        if (info && info.en) return { de: (info.art ? info.art + " " : "") + raw, en: info.en };
+        var rank = window.FreqUtil ? FreqUtil.rankOf(raw) : null;
+        if (rank != null) return { de: raw, en: "häufiges Wort (Rang " + rank + ")" };
+        return { de: raw, en: "—" };
+      }
+
+      /* ============ TOPIC picker ============ */
+      function renderGrid() {
+        var grid = $("topicGrid");
+        grid.innerHTML = "";
+        TOPICS.forEach(function (t) {
+          var b = document.createElement("button");
+          b.className = "topic-card" + (curTopic && t.id === curTopic.id ? " active" : "");
+          b.innerHTML = '<span class="tc-title">' + esc(t.title) + "</span>" + levelPill(t.level);
+          b.addEventListener("click", function () {
+            curTopic = t; showEn = false;
+            hidePop();
+            renderGrid();
+            renderTopic();
+            $("topicView").scrollIntoView({ behavior: "smooth", block: "start" });
+          });
+          grid.appendChild(b);
+        });
+      }
+
+      /* ============ READER (tappable words) ============ */
+      function wrapWords(sentence) {
+        // esc first, then wrap letter-runs; punctuation/spaces pass through
+        return esc(sentence).replace(/[A-Za-zÄÖÜäöüßäöü]+/g, function (w) {
+          var cls = "tw";
+          if (window.FreqUtil) {
+            var gm = glossMatchStatic(w);
+            if (gm && !glossKnown(gm, CUR_STATES)) cls += " tw-new";
+          }
+          return '<span class="' + cls + '" data-w="' + w + '">' + w + "</span>";
+        });
+      }
+      // static (non-popover) gloss match used while rendering — same rule as glossMatch
+      var CUR_STATES = {};
+      function glossMatchStatic(raw) { return glossMatch(raw); }
+
+      function renderReader() {
+        var wrap = $("topicText");
+        wrap.innerHTML = "";
+        curTopic.text.forEach(function (sentence, i) {
+          var row = document.createElement("div");
+          row.className = "sentence-row";
+          row.appendChild(DE.sayButton(sentence));
+          var body = document.createElement("div");
+          body.className = "sentence-body";
+          body.innerHTML =
+            '<div class="sentence-de">' + wrapWords(sentence) + "</div>" +
+            '<div class="en-line"' + (showEn ? "" : ' style="display:none;"') + ">" +
+              esc(curTopic.en[i] || "") + "</div>";
+          row.appendChild(body);
+          wrap.appendChild(row);
+        });
+        // wire tappable words
+        [].forEach.call(wrap.querySelectorAll(".tw"), function (el) {
+          el.addEventListener("click", function (e) { showPop(el, el.getAttribute("data-w")); e.stopPropagation(); });
+        });
+      }
+
+      /* ---- word popover ---- */
+      function hidePop() { var p = $("wordPop"); p.style.display = "none"; p.innerHTML = ""; }
+      function showPop(anchor, raw) {
+        var m = lookupWord(raw);
+        var p = $("wordPop");
+        p.innerHTML = "";
+        var head = document.createElement("div");
+        head.className = "wp-head";
+        head.innerHTML = '<span class="wp-de">' + esc(m.de) + "</span>";
+        head.appendChild(DE.sayButton(raw));
+        var body = document.createElement("div");
+        body.className = "wp-en";
+        body.textContent = m.en;
+        p.appendChild(head);
+        p.appendChild(body);
+        p.style.display = "block";
+        // position under the word, kept inside the viewport
+        var r = anchor.getBoundingClientRect();
+        var top = r.bottom + window.scrollY + 6;
+        var left = r.left + window.scrollX;
+        p.style.top = top + "px";
+        p.style.left = "0px";
+        var pw = p.offsetWidth;
+        var maxLeft = window.scrollX + document.documentElement.clientWidth - pw - 10;
+        if (left > maxLeft) left = Math.max(window.scrollX + 8, maxLeft);
+        p.style.left = left + "px";
+      }
+      document.addEventListener("click", function (e) {
+        if (!e.target.closest || (!e.target.closest("#wordPop") && !e.target.closest(".tw"))) hidePop();
+      });
+
+      /* ============ % bekannt meter ============ */
+      function computeKnown(st) {
+        // Build the set of "still unknown" lemmas from unmastered glossary words
+        // (split multi-word / hyphen entries into parts, dropping very common ones).
+        var unknownParts = Object.create(null);
+        glossOf(curTopic).forEach(function (gw) {
+          if (glossKnown(gw, st)) return;
+          FreqUtil.normalize(gw.de).split(/[^a-zäöüß]+/).forEach(function (part) {
+            if (part.length < 3) return;
+            var r = FreqUtil.rankOf(part);
+            if (r != null && r <= FREE_RANK) return; // common part, don't flag
+            unknownParts[part] = true;
+          });
+        });
+        var total = 0, unknown = 0;
+        curTopic.text.forEach(function (s) {
+          (s.match(/[A-Za-zÄÖÜäöüß]+/g) || []).forEach(function (w) {
+            if (w.length < 2) return;
+            total++;
+            if (unknownParts[FreqUtil.normalize(w)]) unknown++;
+          });
+        });
+        var pct = total ? Math.round((total - unknown) / total * 100) : 100;
+        return { pct: pct, total: total, unknown: unknown };
+      }
+
+      function renderMeter(st) {
+        if (!window.FreqUtil) { $("knownCard").style.display = "none"; return; }
+        var k = computeKnown(st);
+        var ready = k.pct >= 95;
+        $("knPct").textContent = k.pct + "%";
+        $("knBar").style.width = k.pct + "%";
+        $("knLead").textContent = ready
+          ? "Bereit — du kennst fast alle Wörter."
+          : "Noch ein paar neue Wörter.";
+        $("knSub").textContent = "Du kennst ca. " + k.pct + "% der Wörter in diesem Text.";
+        var card = $("knownCard");
+        card.classList.toggle("is-ready", ready);
+        card.classList.toggle("is-learn", !ready);
+      }
+
+      /* ============ unknown-word list ============ */
+      function addToFsrs(gw, btn) {
+        var info = window.FreqUtil ? FreqUtil.info(gw.de) : null;
+        var id = (info && info.cardId) ? info.cardId : "topic_" + slug(gw.de);
+        if (!(info && info.cardId)) {
+          // synthesize a real study card so FSRS can schedule it
+          var extra = DE.load("extraCards", []);
+          if (!Array.isArray(extra)) extra = [];
+          if (!extra.some(function (c) { return c.id === id; })) {
+            extra.push({
+              id: id, de: gw.de, en: gw.en, ex: gw.de, exEn: gw.en,
+              level: curTopic.level || "A2", theme: "Themen: " + curTopic.title
+            });
+            DE.store("extraCards", extra);
+          }
+        }
+        if (window.FreqUtil && FreqUtil.pin) FreqUtil.pin(id); // jump the study queue
+        if (btn) { btn.textContent = "✓ im Lernstapel"; btn.disabled = true; btn.classList.add("good"); }
+      }
+      function alreadyFsrs(gw) {
+        var info = window.FreqUtil ? FreqUtil.info(gw.de) : null;
+        if (info && info.cardId) {
+          var pins = FreqUtil.pinnedIds ? FreqUtil.pinnedIds() : [];
+          return pins.indexOf(info.cardId) !== -1;
+        }
+        var extra = DE.load("extraCards", []);
+        var id = "topic_" + slug(gw.de);
+        return Array.isArray(extra) && extra.some(function (c) { return c.id === id; });
+      }
+
+      function renderUnknown(st) {
+        var box = $("unknownBox");
+        box.innerHTML = "";
+        var todo = glossOf(curTopic).filter(function (gw) { return !glossKnown(gw, st); });
+        if (!todo.length) {
+          box.innerHTML =
+            '<div class="callout good"><div class="c-head">✓ Alles klar</div>' +
+            "Du kennst die wichtigen Wörter dieses Themas schon. Lies laut und sprich frei!</div>";
+          return;
+        }
+        var head = document.createElement("div");
+        head.className = "callout";
+        head.innerHTML = '<div class="c-head">📓 Neue Wörter zuerst lernen</div>' +
+          '<div class="muted" style="margin-bottom:0.4rem;">Nimm sie in den FSRS-Lernstapel auf — dann steigt der Balken oben.</div>';
+        var list = document.createElement("div");
+        list.className = "vocab";
+        todo.forEach(function (gw) {
+          var row = document.createElement("div");
+          row.className = "vrow chunk";
+          row.innerHTML =
+            '<span class="chunk-main"><span class="word">' + esc(gw.de) + "</span>" +
+            '<br><span class="en">' + esc(gw.en) + "</span></span>";
+          var actions = document.createElement("span");
+          actions.className = "chunk-actions";
+          actions.appendChild(DE.sayButton(gw.de));
+          var add = document.createElement("button");
+          add.className = "btn sm";
+          if (alreadyFsrs(gw)) { add.textContent = "✓ im Lernstapel"; add.disabled = true; add.classList.add("good"); }
+          else { add.textContent = "➕ FSRS"; add.title = "In den Lernstapel aufnehmen"; }
+          add.addEventListener("click", function () { addToFsrs(gw, add); });
+          actions.appendChild(add);
+          row.appendChild(actions);
+          list.appendChild(row);
+        });
+        head.appendChild(list);
+        box.appendChild(head);
+      }
+
+      /* ============ OUTPUT prompts (produce-first + mic) ============ */
+      var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      var srSupported = !!SR;
+      var rec = null, listeningBtn = null;
+      function norm(s) { return (s || "").toLowerCase().replace(/[.,!?;:"'„“”()\-–—…]/g, "").replace(/\s+/g, " ").trim(); }
+      function deburr(s) { return s.replace(/ä/g, "a").replace(/ö/g, "o").replace(/ü/g, "u").replace(/ß/g, "ss"); }
+      function score(target, attempt) {
+        var t = norm(String(target).replace(/….*/, "")), a = norm(attempt);
+        var tw = t ? t.split(" ") : [];
+        if (!a) return { level: "bad", ratio: 0 };
+        if (t === a || deburr(t) === deburr(a)) return { level: "ok", ratio: 1 };
+        var aset = a.split(" "), hit = 0;
+        tw.forEach(function (w) { if (aset.some(function (x) { return x === w || deburr(x) === deburr(w); })) hit++; });
+        var ratio = tw.length ? hit / tw.length : 0;
+        return { level: ratio >= 0.6 ? "close" : "bad", ratio: ratio };
+      }
+      function bestScore(target, alts) {
+        var best = { level: "bad", ratio: -1 };
+        (alts.length ? alts : [""]).forEach(function (a) { var s = score(target, a); if (s.ratio > best.ratio) best = s; });
+        return best;
+      }
+      function micStop() {
+        if (rec) { try { rec.stop(); } catch (e) {} }
+        if (listeningBtn) listeningBtn.classList.remove("listening");
+        listeningBtn = null;
+      }
+
+      function renderPrompts() {
+        var wrap = $("promptList");
+        wrap.innerHTML = "";
+        (curTopic.prompts || []).forEach(function (p) {
+          var card = document.createElement("div");
+          card.className = "card prompt-card";
+
+          var cue = document.createElement("div");
+          cue.className = "drill-prompt";
+          cue.innerHTML = "🗣️ " + esc(p.en_cue) +
+            '<div class="muted" style="font-weight:400; margin-top:0.15rem;">' + esc(p.de_cue) + "</div>";
+          card.appendChild(cue);
+
+          var btnRow = document.createElement("div");
+          btnRow.className = "btn-row";
+          var revealBtn = document.createElement("button");
+          revealBtn.className = "btn primary";
+          revealBtn.textContent = "Muster-Antwort aufdecken 🔊";
+          btnRow.appendChild(revealBtn);
+          card.appendChild(btnRow);
+
+          var reveal = document.createElement("div");
+          reveal.style.display = "none";
+          reveal.style.marginTop = "0.6rem";
+          var model = document.createElement("div");
+          model.className = "model-answer";
+          model.textContent = p.model_de;
+          reveal.appendChild(model);
+          var say = document.createElement("span");
+          say.appendChild(DE.sayButton(p.model_de));
+          reveal.appendChild(say);
+
+          // optional mic check
+          var micWrap = document.createElement("div");
+          micWrap.className = "mic-wrap";
+          micWrap.style.cssText = "margin-top:0.9rem; text-align:center;";
+          var micBtn = document.createElement("button");
+          micBtn.className = "mic-btn";
+          micBtn.title = "Sprich jetzt";
+          micBtn.textContent = "🎤";
+          micWrap.appendChild(micBtn);
+          var micHint = document.createElement("div");
+          micHint.className = "muted";
+          micHint.style.marginTop = "0.3rem";
+          micHint.textContent = "Tippen und deine Antwort sprechen";
+          micWrap.appendChild(micHint);
+          reveal.appendChild(micWrap);
+          var tr = document.createElement("div"); tr.className = "sr-transcript"; reveal.appendChild(tr);
+          var fb = document.createElement("div"); fb.className = "feedback"; reveal.appendChild(fb);
+          card.appendChild(reveal);
+
+          revealBtn.addEventListener("click", function () {
+            reveal.style.display = "block";
+            revealBtn.style.display = "none";
+            DE.speak(p.model_de);
+          });
+          micBtn.addEventListener("click", function () {
+            if (!srSupported) { $("no-sr").style.display = "block"; $("no-sr").scrollIntoView({ behavior: "smooth" }); return; }
+            if (listeningBtn === micBtn) { micStop(); return; }
+            micStop();
+            tr.innerHTML = "<em>Hört zu …</em>"; fb.className = "feedback";
+            rec = new SR();
+            rec.lang = "de-DE"; rec.interimResults = true; rec.maxAlternatives = 3; rec.continuous = false;
+            rec.onresult = function (e) {
+              var finalT = "", interim = "", alts = [];
+              for (var i = e.resultIndex; i < e.results.length; i++) {
+                var res = e.results[i];
+                if (res.isFinal) { finalT += res[0].transcript; for (var j = 0; j < res.length; j++) alts.push(res[j].transcript); }
+                else interim += res[0].transcript;
+              }
+              if (interim && !finalT) { tr.innerHTML = '<span class="heard">' + norm(interim) + "</span> …"; return; }
+              if (finalT) {
+                tr.innerHTML = 'Gehört: <span class="heard">' + finalT.trim() + "</span>";
+                var s = bestScore(p.model_de, alts);
+                fb.className = "feedback show " + (s.level === "bad" ? "bad" : s.level);
+                fb.textContent = s.level === "ok" ? "✓ Sehr nah am Muster!"
+                  : s.level === "close" ? "Gut! Deine Antwort darf ruhig anders sein — Hauptsache verständlich."
+                  : "Kein Problem — es geht um DEINE Antwort, nicht ums Nachsprechen. 🔊 zum Vergleichen.";
+              }
+            };
+            rec.onend = function () { if (listeningBtn === micBtn) listeningBtn = null; micBtn.classList.remove("listening"); };
+            rec.onerror = function (ev) { tr.innerHTML = '<span class="muted">Fehler: ' + (ev.error || "unbekannt") + " — Mikrofon prüfen.</span>"; };
+            listeningBtn = micBtn; micBtn.classList.add("listening");
+            try { rec.start(); } catch (e) { micStop(); }
+          });
+
+          wrap.appendChild(card);
+        });
+      }
+
+      /* ============ render a whole topic ============ */
+      function renderTopic() {
+        if (!curTopic) return;
+        micStop();
+        var st = states();
+        CUR_STATES = st;
+        if (window.FreqUtil && FreqUtil.prunePins) FreqUtil.prunePins(st);
+        $("topicView").style.display = "";
+        $("tvTitle").textContent = curTopic.title;
+        $("tvLevel").innerHTML = levelPill(curTopic.level);
+        $("btnToggleEn").textContent = showEn ? "🇬🇧 Englisch verstecken" : "🇬🇧 Englisch zeigen";
+        $("btnToggleEn").classList.toggle("active", showEn);
+        renderMeter(st);
+        renderReader();
+        renderUnknown(st);
+        renderPrompts();
+      }
+
+      /* ============ controls ============ */
+      $("btnToggleEn").addEventListener("click", function () {
+        showEn = !showEn;
+        $("btnToggleEn").textContent = showEn ? "🇬🇧 Englisch verstecken" : "🇬🇧 Englisch zeigen";
+        $("btnToggleEn").classList.toggle("active", showEn);
+        [].forEach.call($("topicText").querySelectorAll(".en-line"), function (el) {
+          el.style.display = showEn ? "" : "none";
+        });
+      });
+      $("btnPlayAll").addEventListener("click", function () {
+        if (curTopic) DE.speak(curTopic.text.join(" "));
+      });
+
+      if (!srSupported) $("no-sr").style.display = "block";
+      renderGrid();
+      renderTopic();
+    })();
+  </script>
+</body>
+</html>

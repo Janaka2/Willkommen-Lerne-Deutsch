@@ -105,10 +105,28 @@
       </div>
       <div class="feedback" id="doneFb"></div>
     </section>
+
+    <!-- ===================== Redemittel-Bausteine ===================== -->
+    <!-- Ready-made chunks (from js/data/chunks.js) the learner can weave onto a
+         seed sentence, e.g. „Ich finde, dass …“ + Kernsatz. Whole-unit building
+         blocks, produce-first practice lives on the Redemittel page. -->
+    <section class="card" id="bausteine">
+      <h2 style="margin-top:0;">🧩 Redemittel-Bausteine</h2>
+      <p class="muted" style="margin-top:-0.4rem;">
+        Fertige Satzanfänge zum Einbauen — häng deinen Kernsatz dran. Zum Beispiel
+        <em>„Ich finde, dass …“</em> + dein Satz. Klick 🔊 zum Hören.
+      </p>
+      <div class="controls" id="bfChips" style="margin-bottom:0.6rem;"></div>
+      <div id="bList" class="vocab"></div>
+      <div class="btn-row" style="margin-bottom:0;">
+        <a class="btn sm" href="redemittel.html">Alle Redemittel üben →</a>
+      </div>
+    </section>
   </main>
 
   <script src="../js/app.js"></script>
   <script src="../js/data/speak-seeds.js"></script>
+  <script src="../js/data/chunks.js"></script>
   <script>
     (function () {
       "use strict";
@@ -385,6 +403,66 @@
       renderTrackChips();
       renderStep();
       renderProgress();
+    })();
+  </script>
+
+  <!-- Redemittel-Bausteine panel: consumes window.CHUNKS as ready-made building
+       blocks. Kept as its own small module so the main unlock logic stays intact. -->
+  <script>
+    (function () {
+      "use strict";
+      var CH = window.CHUNKS || [];
+      var FUNCS = window.CHUNK_FUNCTIONS ||
+        CH.map(function (c) { return c.fn; })
+          .filter(function (v, i, a) { return a.indexOf(v) === i; })
+          .map(function (fn) { return { fn: fn, label: fn, ico: "" }; });
+      var sec = document.getElementById("bausteine");
+      if (!CH.length || !sec) { if (sec) sec.style.display = "none"; return; }
+
+      // Functions most useful as sentence builders come first.
+      var ORDER = ["Meinung", "Überleiten", "Zögern", "Zustimmen", "Widersprechen", "Höflich fragen", "Bestellen", "Gespräch"];
+      FUNCS = FUNCS.slice().sort(function (a, b) {
+        var ia = ORDER.indexOf(a.fn), ib = ORDER.indexOf(b.fn);
+        return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+      });
+
+      var $ = function (id) { return document.getElementById(id); };
+      var curFn = FUNCS[0].fn;
+      function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+      function renderChips() {
+        var wrap = $("bfChips"); wrap.innerHTML = "";
+        FUNCS.forEach(function (f) {
+          var b = document.createElement("button");
+          b.className = "chip" + (f.fn === curFn ? " active" : "");
+          b.textContent = (f.ico ? f.ico + " " : "") + f.label;
+          b.addEventListener("click", function () {
+            curFn = f.fn;
+            [].forEach.call(wrap.children, function (x) { x.classList.remove("active"); });
+            b.classList.add("active");
+            renderList();
+          });
+          wrap.appendChild(b);
+        });
+      }
+      function renderList() {
+        var wrap = $("bList"); wrap.innerHTML = "";
+        CH.filter(function (c) { return c.fn === curFn; }).forEach(function (ch) {
+          var row = document.createElement("div");
+          row.className = "vrow chunk";
+          row.innerHTML =
+            '<span class="chunk-main"><span class="word">' + esc(ch.de) + "</span>" +
+            (ch.register ? ' <span class="pill">' + ch.register + "</span>" : "") +
+            '<br><span class="en">' + esc(ch.en) + "</span></span>";
+          var actions = document.createElement("span");
+          actions.className = "chunk-actions";
+          actions.appendChild(DE.sayButton(ch.de));
+          row.appendChild(actions);
+          wrap.appendChild(row);
+        });
+      }
+      renderChips();
+      renderList();
     })();
   </script>
 </body>

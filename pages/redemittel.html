@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Redemittel — Sätze zum Sprechen</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body data-page="redemittel">
+  <main class="container">
+    <p class="eyebrow">Üben · fertige Sätze</p>
+    <h1 class="page-title">🗣️ Redemittel</h1>
+    <p class="page-sub">
+      Fertige Sätze für echte Gespräche — nach <strong>Funktion</strong> geordnet und als
+      <strong>ganze Einheit</strong> gelernt. Rund die Hälfte der Muttersprache besteht aus solchen
+      festen Bausteinen: Wer sie parat hat, spricht flüssig statt Regeln zusammenzubauen.
+      Wähle eine Funktion, hör die Sätze 🔊, dann <strong>sag sie zuerst selbst</strong>.
+    </p>
+
+    <!-- FUNCTION chips -->
+    <div class="controls" id="fnChips" aria-label="Funktion wählen"></div>
+
+    <!-- MODE toggle: browse vs produce-first drill -->
+    <div class="controls">
+      <span class="muted" style="font-weight:700;">Modus:</span>
+      <button class="chip active" id="modeBrowse" data-mode="browse">📖 Ansehen</button>
+      <button class="chip" id="modeDrill" data-mode="drill">🎯 Üben (zuerst sprechen)</button>
+      <span class="muted" id="practisedCount" style="margin-left:auto;"></span>
+    </div>
+
+    <!-- ============ BROWSE ============ -->
+    <section id="browse">
+      <h2 id="browseTitle"></h2>
+      <div id="chunkList" class="vocab"></div>
+    </section>
+
+    <!-- ============ DRILL (produce-first recall) ============ -->
+    <section id="drill" style="display:none;">
+      <div class="callout warn" id="no-sr" style="display:none;">
+        <div class="c-head">🎤 Kein Mikrofon-Check</div>
+        Dein Browser unterstützt die Spracherkennung nicht — am besten in Chrome. Du kannst trotzdem
+        laut sprechen und dann aufdecken, um zu vergleichen.
+      </div>
+
+      <div class="card">
+        <div class="muted" id="drillFn"></div>
+        <div class="drill-prompt" style="margin:0.4rem 0;">
+          Sag auf Deutsch: <span id="drillEn"></span> 🗣️
+        </div>
+        <div class="btn-row">
+          <button class="btn primary" id="revealBtn">Aufdecken &amp; hören 🔊</button>
+          <button class="btn" id="nextBtn">Weiter →</button>
+        </div>
+
+        <div id="reveal" style="display:none; margin-top:0.6rem;">
+          <div class="model-answer" id="drillDe"></div>
+          <div class="en" id="drillDeEn" style="color:var(--text-soft); font-style:italic;"></div>
+          <span id="drillSay"></span>
+
+          <div class="mic-wrap" style="margin-top:1rem; text-align:center;">
+            <button class="mic-btn" id="micBtn" title="Sprich jetzt">🎤</button>
+            <div class="muted" style="margin-top:0.3rem;">Tippen und den Satz sprechen</div>
+          </div>
+          <div class="sr-transcript" id="tr"></div>
+          <div class="feedback" id="fb"></div>
+
+          <div class="btn-row" style="margin-top:0.9rem;">
+            <button class="btn good" id="gotItBtn">✓ Geübt</button>
+            <button class="btn" id="addFsrsDrill">➕ In FSRS aufnehmen</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/data/chunks.js"></script>
+  <!-- Frequency helper reused ONLY for its pin() → lets an added chunk jump the
+       existing FSRS study queue. Pure local, no fetch. -->
+  <script src="../js/data/frequency.js"></script>
+  <script src="../js/freq-util.js"></script>
+  <script>
+    (function () {
+      "use strict";
+      var CHUNKS = window.CHUNKS || [];
+      var FUNCS = window.CHUNK_FUNCTIONS ||
+        [].concat.apply([], CHUNKS.map(function (c) { return c.fn; }))
+          .filter(function (v, i, a) { return a.indexOf(v) === i; })
+          .map(function (fn) { return { fn: fn, label: fn, ico: "" }; });
+
+      var $ = function (id) { return document.getElementById(id); };
+      var curFn = FUNCS[0].fn;
+      var mode = "browse";
+      var drillIdx = 0;           // pointer within the current function's chunks
+
+      /* ---- stable id + practised store ---- */
+      function slug(s) {
+        return String(s).toLowerCase()
+          .replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss")
+          .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+      }
+      function chunkId(ch) { return "chunk_" + slug(ch.fn) + "_" + slug(ch.de); }
+      function practised() { var a = DE.load("chunksPractised", []); return Array.isArray(a) ? a : []; }
+      function markPractised(ch) {
+        var list = practised(), id = chunkId(ch);
+        if (list.indexOf(id) === -1) { list.push(id); DE.store("chunksPractised", list); }
+        renderCount();
+      }
+      function isPractised(ch) { return practised().indexOf(chunkId(ch)) !== -1; }
+      function renderCount() {
+        $("practisedCount").textContent = "🗣️ " + practised().length + " / " + CHUNKS.length + " geübt";
+      }
+
+      function chunksOf(fn) { return CHUNKS.filter(function (c) { return c.fn === fn; }); }
+      function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+      function levelPill(lvl) {
+        var cls = lvl === "A1" ? "lvl-a1" : lvl === "A2" ? "lvl-a2" : lvl === "B1" ? "lvl-b1" : "";
+        return '<span class="pill ' + cls + '">' + lvl + "</span>";
+      }
+      function regPill(reg) {
+        return reg ? ' <span class="pill">' + reg + "</span>" : "";
+      }
+
+      /* ---- add a chunk to the existing FSRS deck (as an extra card) ---- */
+      function addToFsrs(ch, btn) {
+        var id = chunkId(ch);
+        var extra = DE.load("extraCards", []);
+        if (!Array.isArray(extra)) extra = [];
+        if (!extra.some(function (c) { return c.id === id; })) {
+          extra.push({
+            id: id, de: ch.de, en: ch.en,
+            ex: ch.de, exEn: ch.en,             // the chunk IS the example (whole unit)
+            level: ch.level || "A2", theme: "Redemittel"
+          });
+          DE.store("extraCards", extra);
+        }
+        if (window.FreqUtil && FreqUtil.pin) FreqUtil.pin(id); // jump the study queue
+        if (btn) { btn.textContent = "✓ im Lernstapel"; btn.disabled = true; btn.classList.add("good"); }
+      }
+      function alreadyFsrs(ch) {
+        var extra = DE.load("extraCards", []);
+        return Array.isArray(extra) && extra.some(function (c) { return c.id === chunkId(ch); });
+      }
+
+      /* =================== FUNCTION chips =================== */
+      function renderFnChips() {
+        $("fnChips").innerHTML = "";
+        FUNCS.forEach(function (f) {
+          var b = document.createElement("button");
+          b.className = "chip" + (f.fn === curFn ? " active" : "");
+          b.textContent = (f.ico ? f.ico + " " : "") + f.label;
+          b.addEventListener("click", function () {
+            curFn = f.fn; drillIdx = 0;
+            [].forEach.call($("fnChips").children, function (x) { x.classList.remove("active"); });
+            b.classList.add("active");
+            render();
+          });
+          $("fnChips").appendChild(b);
+        });
+      }
+
+      /* =================== BROWSE =================== */
+      function renderBrowse() {
+        var f = FUNCS.filter(function (x) { return x.fn === curFn; })[0];
+        $("browseTitle").textContent = (f.ico ? f.ico + " " : "") + f.label;
+        var wrap = $("chunkList");
+        wrap.innerHTML = "";
+        chunksOf(curFn).forEach(function (ch) {
+          var row = document.createElement("div");
+          row.className = "vrow chunk";
+          row.innerHTML =
+            '<span class="chunk-main">' +
+              '<span class="word">' + esc(ch.de) + "</span> " +
+              levelPill(ch.level) + regPill(ch.register) +
+              (isPractised(ch) ? ' <span class="kw-tick" title="geübt">✓</span>' : "") +
+              '<br><span class="en">' + esc(ch.en) + "</span>" +
+            "</span>";
+          var actions = document.createElement("span");
+          actions.className = "chunk-actions";
+          actions.appendChild(DE.sayButton(ch.de));
+          var add = document.createElement("button");
+          add.className = "btn sm";
+          if (alreadyFsrs(ch)) { add.textContent = "✓ im Lernstapel"; add.disabled = true; add.classList.add("good"); }
+          else { add.textContent = "➕ FSRS"; add.title = "In den Lernstapel aufnehmen"; }
+          add.addEventListener("click", function () { addToFsrs(ch, add); });
+          actions.appendChild(add);
+          row.appendChild(actions);
+          wrap.appendChild(row);
+        });
+      }
+
+      /* =================== DRILL (produce-first) =================== */
+      function curChunk() { var list = chunksOf(curFn); return list[drillIdx % list.length]; }
+      function renderDrill() {
+        var f = FUNCS.filter(function (x) { return x.fn === curFn; })[0];
+        var ch = curChunk();
+        $("drillFn").textContent = "Funktion: " + (f.ico ? f.ico + " " : "") + f.label;
+        $("drillEn").textContent = ch.en;
+        $("reveal").style.display = "none";
+        $("revealBtn").style.display = "";
+        $("tr").textContent = "";
+        $("fb").className = "feedback";
+        var add = $("addFsrsDrill");
+        if (alreadyFsrs(ch)) { add.textContent = "✓ im Lernstapel"; add.disabled = true; add.classList.add("good"); }
+        else { add.textContent = "➕ In FSRS aufnehmen"; add.disabled = false; add.classList.remove("good"); }
+      }
+      function revealDrill() {
+        var ch = curChunk();
+        $("drillDe").textContent = ch.de;
+        $("drillDeEn").textContent = ch.en + (ch.register ? "  ·  " + ch.register : "");
+        $("drillSay").innerHTML = "";
+        $("drillSay").appendChild(DE.sayButton(ch.de));
+        $("reveal").style.display = "block";
+        $("revealBtn").style.display = "none";
+        DE.speak(ch.de);                     // auto-play the model
+        markPractised(ch);                   // seeing + hearing the model = practised
+      }
+
+      /* =================== Speech recognition (graceful) =================== */
+      var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      var srSupported = !!SR;
+      function norm(s) {
+        return (s || "").toLowerCase().replace(/[.,!?;:"'„“”()\-–—…]/g, "").replace(/\s+/g, " ").trim();
+      }
+      function deburr(s) { return s.replace(/ä/g, "a").replace(/ö/g, "o").replace(/ü/g, "u").replace(/ß/g, "ss"); }
+      function score(target, attempt) {
+        // The model may end in "…" (an open frame); score only the FIXED words.
+        var t = norm(target.replace(/….*/, "")), a = norm(attempt);
+        var tw = t ? t.split(" ") : [];
+        if (!a) return { level: "bad", ratio: 0 };
+        if (t === a || deburr(t) === deburr(a)) return { level: "ok", ratio: 1 };
+        var aset = a.split(" "), hit = 0;
+        tw.forEach(function (w) { if (aset.some(function (x) { return x === w || deburr(x) === deburr(w); })) hit++; });
+        var ratio = tw.length ? hit / tw.length : 0;
+        return { level: ratio >= 0.6 ? "close" : "bad", ratio: ratio };
+      }
+      function bestScore(target, alts) {
+        var best = { level: "bad", ratio: -1 };
+        (alts.length ? alts : [""]).forEach(function (a) { var s = score(target, a); if (s.ratio > best.ratio) best = s; });
+        return best;
+      }
+      var rec = null, listening = false;
+      function micStop() { if (rec) { try { rec.stop(); } catch (e) {} } listening = false; $("micBtn").classList.remove("listening"); }
+      function wireMic() {
+        var micBtn = $("micBtn");
+        micBtn.addEventListener("click", function () {
+          if (!srSupported) { $("no-sr").style.display = "block"; $("no-sr").scrollIntoView({ behavior: "smooth" }); return; }
+          if (listening) { micStop(); return; }
+          var ch = curChunk(), tr = $("tr"), fb = $("fb");
+          tr.innerHTML = "<em>Hört zu …</em>"; fb.className = "feedback";
+          rec = new SR();
+          rec.lang = "de-DE"; rec.interimResults = true; rec.maxAlternatives = 3; rec.continuous = false;
+          rec.onresult = function (e) {
+            var finalT = "", interim = "", alts = [];
+            for (var i = e.resultIndex; i < e.results.length; i++) {
+              var res = e.results[i];
+              if (res.isFinal) { finalT += res[0].transcript; for (var j = 0; j < res.length; j++) alts.push(res[j].transcript); }
+              else interim += res[0].transcript;
+            }
+            if (interim && !finalT) { tr.innerHTML = '<span class="heard">' + norm(interim) + "</span> …"; return; }
+            if (finalT) {
+              tr.innerHTML = 'Gehört: <span class="heard">' + finalT.trim() + "</span>";
+              var s = bestScore(ch.de, alts);
+              fb.className = "feedback show " + (s.level === "bad" ? "bad" : s.level);
+              fb.textContent = s.level === "ok" ? "✓ Perfekt! Genau richtig."
+                : s.level === "close" ? "Fast! Vergleiche mit dem Satz oben."
+                : "Noch nicht ganz — hör nochmal 🔊 und versuch's wieder.";
+            }
+          };
+          rec.onend = function () { listening = false; micBtn.classList.remove("listening"); };
+          rec.onerror = function (e) { $("tr").innerHTML = '<span class="muted">Fehler: ' + (e.error || "unbekannt") + " — Mikrofon prüfen.</span>"; };
+          listening = true; micBtn.classList.add("listening");
+          try { rec.start(); } catch (e) { micStop(); }
+        });
+      }
+
+      /* =================== Mode + wiring =================== */
+      function render() {
+        if (mode === "browse") { $("browse").style.display = ""; $("drill").style.display = "none"; renderBrowse(); }
+        else { $("browse").style.display = "none"; $("drill").style.display = ""; renderDrill(); }
+      }
+      function setMode(m) {
+        mode = m; micStop();
+        $("modeBrowse").classList.toggle("active", m === "browse");
+        $("modeDrill").classList.toggle("active", m === "drill");
+        render();
+      }
+
+      $("modeBrowse").addEventListener("click", function () { setMode("browse"); });
+      $("modeDrill").addEventListener("click", function () { setMode("drill"); });
+      $("revealBtn").addEventListener("click", revealDrill);
+      $("nextBtn").addEventListener("click", function () { drillIdx++; micStop(); renderDrill(); });
+      $("gotItBtn").addEventListener("click", function () { markPractised(curChunk()); drillIdx++; renderDrill(); });
+      $("addFsrsDrill").addEventListener("click", function () { addToFsrs(curChunk(), $("addFsrsDrill")); });
+
+      if (!srSupported) $("no-sr").style.display = "block";
+      wireMic();
+      renderFnChips();
+      renderCount();
+      render();
+    })();
+  </script>
+</body>
+</html>

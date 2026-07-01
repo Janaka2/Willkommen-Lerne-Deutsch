@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kernwortschatz — die häufigsten Wörter</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body data-page="kernwortschatz">
+  <main class="container">
+    <p class="eyebrow">Wortschatz · nach echter Häufigkeit</p>
+    <h1 class="page-title">📊 Kernwortschatz</h1>
+    <p class="page-sub">
+      Die häufigsten deutschen Wörter — in Korpus-Reihenfolge. Die ersten ~1000
+      decken rund <strong>80&nbsp;% der Alltagssprache</strong> ab. Lerne sie zuerst,
+      und du verstehst am meisten pro Wort. Klick 🔊 zum Hören, <strong>Lernen</strong>
+      legt ein unbekanntes Wort in deinen Lernstapel.
+    </p>
+
+    <!-- ============ COVERAGE METER (real FSRS, not points) ============ -->
+    <section class="card cover-card">
+      <div class="cover-top">
+        <div class="cover-big"><span id="cov-pct">0</span><span class="cover-unit">%</span></div>
+        <div class="cover-say">
+          <div class="cover-lead">der Alltagssprache kannst du schon folgen</div>
+          <div class="cover-sub muted" id="cov-sub">0 von 0 der Top-1000-Wörter gefestigt</div>
+        </div>
+      </div>
+      <div class="progress-bar" style="margin-top:0.7rem;"><span id="cov-bar"></span></div>
+      <p class="muted cover-note">
+        „Gefestigt“ = ein Wort, das dein Gedächtnis stabil hält
+        (FSRS-Stabilität ≥ <span id="cov-thresh">21</span> Tage) — ehrliche Daten aus
+        deinen Wiederholungen, keine Punkte.
+      </p>
+    </section>
+
+    <div class="controls">
+      <input class="search" id="search" type="search" placeholder="Suchen… (Deutsch oder Englisch)" />
+    </div>
+    <div class="controls" id="topchips">
+      <span class="muted" style="font-weight:700;">Zeigen:</span>
+      <button class="chip active" data-top="100">Top 100</button>
+      <button class="chip" data-top="500">Top 500</button>
+      <button class="chip" data-top="1000">Top 1000</button>
+      <button class="chip" data-top="2000">Top 2000</button>
+    </div>
+    <div class="controls" id="statechips">
+      <button class="chip active" data-state="all">Alle</button>
+      <button class="chip" data-state="todo">Noch zu lernen</button>
+      <button class="chip" data-state="strong">Gefestigt</button>
+    </div>
+    <p class="muted" id="count"></p>
+
+    <div id="list" class="vocab"></div>
+  </main>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/data/cards.js"></script>
+  <script src="../js/data/nouns.js"></script>
+  <script src="../js/data/verbs.js"></script>
+  <script src="../js/data/frequency.js"></script>
+  <script src="../js/freq-util.js"></script>
+  <script src="../js/vendor/ts-fsrs.umd.js"></script>
+  <script src="../js/progress.js"></script>
+  <script>
+    (function () {
+      var FU = window.FreqUtil;
+      var listEl = document.getElementById("list");
+      var searchEl = document.getElementById("search");
+      var countEl = document.getElementById("count");
+      var topFilter = 100;
+      var stateFilter = "all";
+
+      // ---- coverage meter (anchored to the top 1000, the standard rule) ----
+      function refreshMeter() {
+        var cov = FU.coverage(1000);
+        document.getElementById("cov-pct").textContent = cov.speechPct;
+        document.getElementById("cov-bar").style.width =
+          Math.min(100, cov.speechPct) + "%";
+        document.getElementById("cov-sub").textContent =
+          cov.known + " von " + cov.learnable + " lernbaren Top-1000-Wörtern gefestigt";
+        document.getElementById("cov-thresh").textContent = FU.STRONG_STABILITY_DAYS;
+      }
+
+      // ---- strong-set for row ticks (recomputed each render) ----
+      function strongSet() {
+        return (window.PROG && PROG.loadStates) ? PROG.loadStates() : {};
+      }
+
+      function render() {
+        var states = strongSet();
+        var q = searchEl.value.trim().toLowerCase();
+        var rows = [];
+        var shown = 0;
+
+        (window.FREQ || []).forEach(function (entry) {
+          if (entry.rank > topFilter) return;
+          var vi = FU.info(entry.de);
+          var en = vi && vi.en ? vi.en : "";
+          var art = vi && vi.art ? vi.art : "";
+          var cardId = vi && vi.cardId ? vi.cardId : null;
+          var strong = cardId ? FU.isStrongCard(states, cardId) : false;
+
+          if (stateFilter === "strong" && !strong) return;
+          if (stateFilter === "todo" && (strong || !cardId)) return;
+          if (q && (entry.de + " " + en).toLowerCase().indexOf(q) === -1) return;
+
+          shown++;
+          var row = document.createElement("div");
+          row.className = "vrow kw" + (art ? " " + art : "") + (strong ? " is-strong" : "");
+
+          // rank badge
+          var badge = '<span class="rank-badge">#' + entry.rank + '</span>';
+          // word — gender-coloured for nouns
+          var wordCls = art ? "word g-" + art : "word";
+          var wordHtml = '<span class="' + wordCls + '">' +
+            (art ? art + " " : "") + capFirst(entry.de, art) + "</span>";
+          var enHtml = en ? '<span class="en"> — ' + en + "</span>" : "";
+          var tick = strong ? '<span class="kw-tick" title="gefestigt">✓</span>' : "";
+
+          row.innerHTML =
+            badge +
+            '<span class="kw-main">' + wordHtml + enHtml + tick + "</span>";
+
+          // audio (article + noun for nouns, else the lemma)
+          var sayText = art ? (art + " " + capFirst(entry.de, art)) : entry.de;
+          var audioCell = document.createElement("span");
+          audioCell.className = "kw-actions";
+          audioCell.appendChild(DE.sayButton(sayText));
+
+          // Lernen button — only for learnable, not-yet-strong words
+          if (cardId && !strong) {
+            var b = document.createElement("button");
+            b.className = "btn sm kw-learn";
+            b.textContent = "+ Lernen";
+            b.addEventListener("click", function () {
+              FU.pin(cardId);
+              b.textContent = "✓ im Stapel";
+              b.disabled = true;
+              b.classList.add("pinned");
+            });
+            if (FU.pinnedIds().indexOf(cardId) !== -1) {
+              b.textContent = "✓ im Stapel"; b.disabled = true; b.classList.add("pinned");
+            }
+            audioCell.appendChild(b);
+          }
+          row.appendChild(audioCell);
+          rows.push(row);
+        });
+
+        listEl.innerHTML = "";
+        rows.forEach(function (r) { listEl.appendChild(r); });
+        if (!shown) listEl.innerHTML = '<p class="muted">Nichts gefunden.</p>';
+        countEl.textContent = shown + " Wörter";
+      }
+
+      // Nouns: lemma in FREQ is capitalised already ("Mann"); keep as-is.
+      // Function words / verbs: keep lower-case. So just return as stored.
+      function capFirst(de, art) { return de; }
+
+      // ---- chips ----
+      document.querySelectorAll("#topchips .chip").forEach(function (b) {
+        b.addEventListener("click", function () {
+          topFilter = parseInt(b.dataset.top, 10);
+          document.querySelectorAll("#topchips .chip").forEach(function (x) { x.classList.remove("active"); });
+          b.classList.add("active");
+          render();
+        });
+      });
+      document.querySelectorAll("#statechips .chip").forEach(function (b) {
+        b.addEventListener("click", function () {
+          stateFilter = b.dataset.state;
+          document.querySelectorAll("#statechips .chip").forEach(function (x) { x.classList.remove("active"); });
+          b.classList.add("active");
+          render();
+        });
+      });
+      searchEl.addEventListener("input", render);
+
+      refreshMeter();
+      render();
+    })();
+  </script>
+</body>
+</html>

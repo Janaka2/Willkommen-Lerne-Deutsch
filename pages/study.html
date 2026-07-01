@@ -146,6 +146,10 @@
   <!-- Noun meaning-emoji map (window.imgFor) for dual coding on the recall side.
        Pure local data; keeps the page fully offline. -->
   <script src="../js/data/nouns.js"></script>
+  <!-- Frequency list + lookup helper: lets words queued from the Kernwortschatz
+       page ("Lernen" → de_studyPinned) jump into this FSRS deck. Pure local. -->
+  <script src="../js/data/frequency.js"></script>
+  <script src="../js/freq-util.js"></script>
   <!-- ts-fsrs UMD build: a classic global script (window.FSRS) so the page
        also works when opened directly from disk (file://), where ES-module
        imports are blocked by the browser. -->
@@ -175,7 +179,12 @@
        --------------------------------------------------------------- */
     const DIRS = ["recognition", "production"];
     const ITEMS = [];
-    (window.CARDS || []).forEach(function (c) {
+    // The deck = the bundled cards PLUS any user-added extras (e.g. Redemittel
+    // chunks the learner sent here from pages/redemittel.html, stored in
+    // de_extraCards). Extras have stable "chunk_…" ids so they never collide.
+    const EXTRA = (function () { var e = DE.load("extraCards", []); return Array.isArray(e) ? e : []; })();
+    const ALL_CARDS = (window.CARDS || []).concat(EXTRA);
+    ALL_CARDS.forEach(function (c) {
       DIRS.forEach(function (dir) {
         ITEMS.push({ key: c.id + ":" + dir, card: c, dir: dir });
       });
@@ -254,11 +263,30 @@
       // Sort due by how overdue (most overdue first).
       due.sort(function (a, b) { return STATES[a.key].due - STATES[b.key].due; });
 
-      const budget = Math.max(0, newLimit - newToday());
-      const fresh = pool.filter(isNew).slice(0, budget);
+      // Words the learner queued from the Kernwortschatz page ("Lernen") jump
+      // to the front as NEW cards — bypassing the level/theme/direction filters
+      // and the daily new-card budget, because the learner asked for them
+      // explicitly. Both directions of a pinned card are surfaced. Pins are
+      // pruned once the card has any FSRS state (it's genuinely in the deck).
+      let pinnedFresh = [];
+      const pinnedKeys = {};
+      if (window.FreqUtil) {
+        FreqUtil.prunePins(STATES);
+        const pinSet = {};
+        FreqUtil.pinnedIds().forEach(function (id) { pinSet[id] = true; });
+        pinnedFresh = ITEMS.filter(function (it) {
+          return isNew(it) && pinSet[it.card.id];
+        });
+        pinnedFresh.forEach(function (it) { pinnedKeys[it.key] = true; });
+      }
 
-      // Interleave a little: reviews first, then new.
-      return due.concat(fresh);
+      const budget = Math.max(0, newLimit - newToday());
+      const fresh = pool.filter(function (it) {
+        return isNew(it) && !pinnedKeys[it.key];
+      }).slice(0, budget);
+
+      // Pinned first (immediate payoff), then due reviews, then fresh new cards.
+      return pinnedFresh.concat(due, fresh);
     }
 
     function updateStats() {
@@ -407,7 +435,7 @@
     // Build theme dropdown from the deck.
     (function buildThemes() {
       const sel = document.getElementById("themeSel");
-      const themes = Array.from(new Set((window.CARDS || []).map(function (c) { return c.theme; }))).sort();
+      const themes = Array.from(new Set(ALL_CARDS.map(function (c) { return c.theme; }))).sort();
       sel.innerHTML = '<option value="all">Alle Themen</option>' +
         themes.map(function (t) { return '<option value="' + t + '">' + t + '</option>'; }).join("");
       sel.addEventListener("change", function () {
