@@ -25,6 +25,7 @@
       { key: "basics",       label: "A1 Grundlagen",  href: "pages/basics.html" }
     ]},
     { label: "Wortschatz", items: [
+      { key: "kernwortschatz", label: "Kernwortschatz", href: "pages/kernwortschatz.html" },
       { key: "nouns",     label: "Nomen",   href: "pages/nouns.html" },
       { key: "verbs",     label: "Verben",  href: "pages/verbs.html" },
       { key: "sentences", label: "Sätze",   href: "pages/sentences.html" },
@@ -36,6 +37,8 @@
       { key: "quiz",       label: "Quiz",                 href: "pages/quiz.html" },
       { key: "listening",  label: "Hören & Nachsprechen", href: "pages/listening.html" },
       { key: "speaking",   label: "Sprechen",             href: "pages/speaking.html" },
+      { key: "redemittel", label: "🗣️ Redemittel",        href: "pages/redemittel.html" },
+      { key: "themen",     label: "💬 Themen-Gespräche",  href: "pages/themen.html" },
       { key: "unlock",     label: "🔓 Sprechen freischalten", href: "pages/unlock.html" },
       { key: "dialogs",    label: "Dialoge",              href: "pages/dialogs.html" }
     ]},
